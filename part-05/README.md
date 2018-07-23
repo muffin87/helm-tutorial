@@ -4,18 +4,18 @@ In this part we will take a look at what we can do with an already running
 release. It's a common use case to manipulate a running release without
 deleting and redeploying it as this would result in a downtime of our service.
 With Helm you can update and also rollback releases. It makes use of the normal
-Kubernetes strategies (canary, rolling updates).
+Kubernetes strategies (rolling updates).
 
-Let's start by updating our blog_
+Let's start by updating our blog.
 
 ## Update
 
 As an example we choose a very simple update. We want to update the version of
 Ghost. This means we need to update the docker tag, which is defined in the 
-`values.yaml`. In addition we need to change the chart version in the
+`values.yaml`. In addition we need to change the Chart version in the
 `Chart.yaml`
 
-Now let's try to update our chart. (I included the updated chart under
+Now let's try to update our Chart. (I included the updated chart under
 `part-05/templates/ghost`).
 
 ```
@@ -47,9 +47,9 @@ blog-0  1/1    Running  0         1m
 ```
 
 We use the `upgrade` command followed by the name of the release and the location
-where the updated chart can be found. Since we updated the docker image,
+where the updated Chart can be found. Since we updated the Docker image,
 Kubernetes will handle the update for us. This means it will terminate the Pod
-and create a new one with the new docker image. To verify that our changed
+and create a new one with the new Docker image. To verify that our changed
 was successfully applied, we can do the following:
 
 ```
@@ -61,12 +61,12 @@ kubectl -n tools describe pod blog-0 | grep Image
 That looks very good. You could now try to access the blog again, to check if
 the change didn't break anything.
 
-_Note: The canary or rolling update for a Deployment or a Statefulset will
+_Note: The rolling update for a Deployment or a Statefulset will
 not be triggered by every value you change in the manifest files. For example
 if you change only a label your Pods will not be recreated automatically.
 You would have to trigger the update manually by deleting the corresponding Pods._
 
-So we did an update. But imagimr you have an update which is causing trouble and
+So we did an update. But imagine you have an update which is causing trouble and
 you need to go back to the state where everything was fine. This operation is
 called rollback. Before we can execute the rollback, we need some background
 information on how Helm manages the state of releases.
@@ -74,7 +74,7 @@ information on how Helm manages the state of releases.
 ## What's under the hood?
 
 So what magic does Helm use to keep track of releases. We can once again list
-the helm releases with:
+the Helm releases with:
 
 ```bash
 helm list
@@ -127,7 +127,7 @@ metadata:
   uid: 2f3b322d-8cdb-11e8-81ac-08002779694e
 ```
 
-As you see we have a data field called `release` where helm stores hashed
+As you see we have a data field called `release` where Helm stores hashed
 information about the release. In addition we see a lot of metadata about the
 release such as the name and the version. We should now test if these
 information let us rollback to the first revision.

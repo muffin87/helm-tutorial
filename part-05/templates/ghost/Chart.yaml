@@ -1,6 +1,7 @@
 name: ghost
 home: https://ghost.org/de/
-version: 1.24.9
+appVersion: 1.24.8
+version: 1.0.0
 description: Ghost is a free and open source blogging platform written in JavaScript and
   distributed under the MIT License, designed to simplify the process of online
   publishing for individual bloggers as well as online publications.

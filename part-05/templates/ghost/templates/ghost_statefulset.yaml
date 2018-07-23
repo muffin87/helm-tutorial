@@ -9,16 +9,16 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    component: {{ .Values.ghost.statefulset.labels.component }}
+    component: "{{ .Values.statefulset.labels.component }}"
 
 spec:
   serviceName: {{ .Release.Name }}
-  replicas: {{ .Values.ghost.statefulset.replicas }}
+  replicas: {{ .Values.statefulset.replicas }}
 
   selector:
     matchLabels:
       app: {{ template "ghost.fullname" . }}
-      component: {{ .Values.ghost.statefulset.labels.component }}
+      component: {{ .Values.statefulset.labels.component }}
 
   template:
     metadata:
@@ -27,42 +27,42 @@ spec:
         heritage: {{ .Release.Service }}
         release: {{ .Release.Name }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        component: "{{ .Values.ghost.statefulset.labels.component }}"
+        component: {{ .Values.statefulset.labels.component }}
 
     spec:
       containers:
-      - name: {{ .Values.ghost.statefulset.dockerImage }}
+      - name: {{ .Values.statefulset.dockerImage }}
 
-        image: "{{ .Values.ghost.statefulset.dockerImage }}:{{ .Values.ghost.statefulset.dockerTag }}"
+        image: "{{ .Values.statefulset.dockerImage }}:{{ .Values.statefulset.dockerTag }}"
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
 
         readinessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.statefulset.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.statefulset.readiness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.ghost.statefulset.readiness.timeoutSeconds }}
+            port: {{ .Values.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.statefulset.readiness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.statefulset.readiness.timeoutSeconds }}
 
         livenessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.statefulset.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.statefulset.liveness.initialDelaySeconds }}
-          periodSeconds: {{ .Values.ghost.statefulset.liveness.periodSeconds }}
-          timeoutSeconds: {{ .Values.ghost.statefulset.liveness.timeoutSeconds }}
+            port: {{ .Values.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.statefulset.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.statefulset.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.statefulset.liveness.timeoutSeconds }}
 
         resources:
           requests:
-            cpu: {{ .Values.ghost.statefulset.resources.requests.cpu }}
-            memory: {{ .Values.ghost.statefulset.resources.requests.mem }}
+            cpu: {{ .Values.statefulset.resources.requests.cpu }}
+            memory: {{ .Values.statefulset.resources.requests.mem }}
           limits:
-            cpu: {{ .Values.ghost.statefulset.resources.limits.cpu }}
-            memory: {{ .Values.ghost.statefulset.resources.limits.mem }}
+            cpu: {{ .Values.statefulset.resources.limits.cpu }}
+            memory: {{ .Values.statefulset.resources.limits.mem }}
 
         ports:
-        - name: {{ .Values.ghost.statefulset.ports.name }}
-          protocol: {{ .Values.ghost.statefulset.ports.protocol }}
-          containerPort: {{ .Values.ghost.statefulset.ports.port }}
+        - name: {{ .Values.statefulset.ports.name }}
+          protocol: {{ .Values.statefulset.ports.protocol }}
+          containerPort: {{ .Values.statefulset.ports.port }}
 
         volumeMounts:
         - mountPath: /var/lib/ghost/content

@@ -9,15 +9,15 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    component: {{ .Values.ghost.statefulset.labels.component }}
+    component: {{ .Values.statefulset.labels.component }}
 
 spec:
   selector:
     app: {{ template "ghost.fullname" . }}
-    component: {{ .Values.ghost.statefulset.labels.component }}
+    component: {{ .Values.statefulset.labels.component }}
 
   ports:
-    - name: {{ .Values.ghost.statefulset.ports.name }}
-      port: {{ .Values.ghost.statefulset.ports.port }}
-      protocol: {{ .Values.ghost.statefulset.ports.protocol }}
-      targetPort: {{ .Values.ghost.statefulset.ports.targetPort }}
+    - name: {{ .Values.statefulset.ports.name }}
+      port: {{ .Values.statefulset.ports.port }}
+      protocol: {{ .Values.statefulset.ports.protocol }}
+      targetPort: {{ .Values.statefulset.ports.targetPort }}
