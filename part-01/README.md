@@ -21,7 +21,7 @@ After that please follow the instructions on the
 it now. Please play attention to the dependencies of Minikube. When you are done, 
 open a terminal and start Minikube.
 
-```
+```bash
 minikube start
 Starting local Kubernetes v1.10.0 cluster...
 Starting VM...
@@ -43,7 +43,7 @@ Loading cached images from config file.
 
 After the start up you should check if you can interact with the Kubernetes API.
 
-```
+```bash
 kubectl get node
 NAME       STATUS    ROLES     AGE       VERSION
 minikube   Ready     master    47s       v1.10.0
@@ -51,7 +51,7 @@ minikube   Ready     master    47s       v1.10.0
 
 Additionally take a look at the running Pods.
 
-```
+```bash
 kubectl get pods -o wide --all-namespaces
 NAMESPACE     NAME                                    READY     STATUS    RESTARTS   AGE       IP           NODE
 kube-system   etcd-minikube                           1/1       Running   0          6m        10.0.2.15    minikube
@@ -70,7 +70,7 @@ To make this tutorial a little bit more realistic you will now create some
 A Namespace is a logic unit and I like to tread them as environments. I have
 prepared some Namespaces to create them just execute:
 
-```
+```bash
 kubectl apply -f part-01/templates/namespaces.yml
 namespace/dev created
 namespace/test created
@@ -80,7 +80,7 @@ namespace/tools created
 
 Verify that everything worked as expected:
 
-```
+```bash
 kubectl get namespaces
 NAME          STATUS    AGE
 default       Active    12m
