@@ -1,45 +1,55 @@
 # Part III: Deploy your first chart
 
-Now that we have everything in place you can deploy the first chart. To start
-very simple we will take an already packaged and tested chart. To get one of
+Now that we have everything in place, we can deploy our first chart. To start
+off simple, we will take an already packaged and tested chart. To get one of
 these `Charts` we will need to introduce the Helm repo management.
 
 ## Helm Repos
 
-To easily manage share and reuse already packaged `Charts` the Helm Devs
-developed repositories. For now we can define a `Charts` as a bundle of 
+To easily ,manage share and reuse already packaged `Charts` the Helm Devs
+developed repositories. For now we can define a `Chart` as a bundle of
 information necessary to create an instance of a Kubernetes application. A `Chart`
-normally contains a lot of YAML based files. To better handle them as a unit
-Helm packages and compress these files. We can say that Helm produces a shipment
+normally contains a lot of YAML based files. To better handle them as a unit,
+Helm packages and compresses these files. Helm produces a shipment
 artifact, which is normally stored as `<ChartName>.tar.gz`. To serve these
-packaged `Charts` a simple web server with an special index file is used (In
+packaged `Charts`, a simple web server with an special index file is used (In
 [Part VI](../part-06/README.md) we will go into detail about that).
 
-With the `helm repo` command you can easily manage repositories. You can list,
-add, update and remove repo. By default Helm also setups some default repos.
+With the `helm repo` command, you can easily manage repositories. You can list,
+add, update and remove them. Helm also setups some default repositories:
 
 ```
 helm repo list
+```
+
+```
 NAME    URL
 stable  https://kubernetes-charts.storage.googleapis.com
 local   http://127.0.0.1:8879/charts
 ```
 
-As you see two repos are already there. `stable` is the alias for the official
-Helm repo. `local` as an alias when you want to host your own little repo (this
-is mainly for development only use cases). We will take a look at the `stable`
-repo. Currently you can't browse or explore a repo from the command line.
-You need to check if the repo has a web frontend or something else. For the
-`stable` repo you can just check out [Github](https://github.com/kubernetes/charts/tree/master/stable).
+There are two repositories by default:
+ * `stable` is the alias for the official Helm repo
+ * `local` as an a lias when you want to host your own little repo (this
+is mainly for development only use cases).
+
+Let's take a look at the `stable` repo. Currently you can't browse or explore
+a repo from the command line. You need to check if the repo has a web frontend
+or something else. For the `stable` repo you can just check out
+[Github](https://github.com/kubernetes/charts/tree/master/stable) or the
+[App Hub](https://hub.kubeapps.com/).
 
 ## Your first deployment
 
 The first demo application you will deploy is [Dokuwiki](https://www.dokuwiki.org/dokuwiki).
-Dokuwiki is a very simple open source wiki software. Before you can install it
-I recommend to update the `stable` repo with:
+Dokuwiki is a very simple open source wiki software. Before installing it,
+I recommend updating the `stable` repo with:
 
 ```
 helm repo update
+```
+
+```
 Hang tight while we grab the latest from your chart repositories...
 ...Skip local chart repository
 ...Successfully got an update from the "stable" chart repository
@@ -50,6 +60,9 @@ Let try the Helming:
 
 ```
 helm install --name wiki stable/dokuwiki
+```
+
+```
 NAME:   wiki
 LAST DEPLOYED: Wed Jul 18 21:43:30 2018
 NAMESPACE: default
@@ -96,106 +109,124 @@ NOTES:
   echo Password: $(kubectl get secret --namespace default wiki-dokuwiki -o jsonpath="{.data.dokuwiki-password}" | base64 --decode)
 ```
 
-So what happened? We have told `helm` that we want to install something.
-When we deploy something with Helm we create a so called `Release`. This is
-required and also a very good idea to give your release a name. We did this with
-`--name wiki`. And the last part of the command specifies the path and the name
-of the `Chart` we want to use `stable/dokuwiki`. 
+So, what happened? We told `helm` that we want to install something.
+When we deploy with Helm, we create a so called `Release`. We gave our release a
+name with `--name wiki` (if you don't supply a release name, Helm will generate
+one for you. The last part of the command specifies the path and the name
+of the `Chart` we want to use. In this case `stable/dokuwiki`.
 
-The output will always contain some basic status information like the name of
+The output will always contain some basic status information, like the name of
 the release, when the deployment happened, the Namespace where it was deployed
 to and the status of the release.
 After that helm will list all Kubernetes objects / resources which where created
 with this release.
 The last part contains additional information added by the author of the `Chart`
-to get you started with the application you deployed. 
+to get you started with the application you just deployed.
 
-In this Minikube case we can't follow that instructions blindly. When you try to
-follow step 1 you will notice that the result will be empty. This is because the
-author added `type: LoadBalancer` in the service object for the wiki. Minikube
-don't support that feature out of the box. When you list the service you will
-see:
+In this Minikube example we can't follow these instructions blindly. When you
+try to follow step 1, you will notice that the result will be empty. This is
+because the author added `type: LoadBalancer` to the service object of the wiki.
+Minikube doesn't support that feature out of the box. When you list the services
+you will see:
 
 ```
 kubectl -n tools get svc -o wide
+```
+
+```
 NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE       SELECTOR
 tiller-deploy   ClusterIP      10.97.201.183    <none>        44134/TCP                    1d        app=helm,name=tiller
 wiki-dokuwiki   LoadBalancer   10.102.226.119   <pending>     80:30597/TCP,443:32240/TCP   9h        app=dokuwiki
 ```
 
-The external-ip is in a pending state. Anyways we can help us here with a simple
-trick by using something called `port-forward`. For this we need to know the name
-of the Pod we want to access:
+The external-ip is in a pending state. We can use a simple trick to access our wiki anyways - `kubectl port-forward`.
+For this to work, we need to know the name of the Pod we want to access:
 
 ```bash
 kubectl -n tools get pods -o wide
+```
+
+```
 NAME                             READY     STATUS    RESTARTS   AGE       IP           NODE
 tiller-deploy-66998d5d74-9d2gc   1/1       Running   1          1d        172.17.0.4   minikube
 wiki-dokuwiki-6bb9fbbb67-m97r4   1/1       Running   0          9h        172.17.0.5   minikube
 ```
 
-To start the forwarding you can enter this following command. But be aware
-that this command don't finished until you cancel it. When you cancel the
-forwarding will stop working.
+To start the forwarding run the following command:
 
 ```
 kubectl -n tools port-forward  wiki-dokuwiki-6bb9fbbb67-m97r4 8080:80
+```
+
+```
 Forwarding from 127.0.0.1:8080 -> 80
 Forwarding from [::1]:8080 -> 80
 ```
 
-What happens here is that you get network access to the Pod TCP port 80.
-Everything you send to 127.0.0.1 port 8080 will be redirect or forwarded to the
-Pod. Our API server and the Kubelet will help us with this. For more details
+Portforwarding is active as long as the command is running. So make sure to not
+quit as long as you need to access to the page.
+
+You get network access to the Pods TCP port 80.
+Everything you send to 127.0.0.1 port 8080, will be redirected or forwarded to
+the Pod. Our API server and the Kubelet will take care of this. For more details
 checkout [this](https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/).
 
-_Note: When you want to forward the service to a port in range from 1 to 1024 you
-will need to execute this command with privileged permissions._
+_Note: When you want to forward a service to a port in the range from 1 to 1024
+you will need to execute this command with privileged permissions._
 
 Open a browser and hit the URL http://localhost:8080. You should now see your
 wiki. To login you can now follow step 2 of the instructions.
 
 ## Manage Releases
 
-Now that you installed a `Chart` we should take a look how you can manage your
-releases. A very important feature is how you can find and see what releases
-are currently deployed. You can do that by executing:
+Now that you installed a `Chart`, we should take a look how you can manage your
+releases. A very important feature is seeing what releases are currently
+deployed. You can do that by executing:
 
 ```bash
 helm list
+```
+
+```
 NAME    REVISION        UPDATED                         STATUS          CHART           NAMESPACE
 wiki    1               Wed Jul 18 21:43:30 2018        DEPLOYED        dokuwiki-2.0.3  default
 ```
 
 We see the name of the releases, the revision number (we will cover this more
-deeply in [Part IV](../part-05/README.md)), when the last updated happened, that
+deeply in [Part IV](../part-05/README.md)), when the last update happened, the
 status of the release, which `Chart` and version was deployed and in which
 Namespace.
 
 Let's assume you deployed to the wrong Namespace. We don't want the wiki to live
-in the `default` Namespace. We want to in the `tools` Namespace. A good practise
-to delete and redeploy the wiki right? ;)
+in the `default` Namespace. We want it in the `tools` Namespace. Let's delete
+and redeploy the wiki! ;)
 
-To delete a release you need to now the name of the release. In our case we know
-the name it's `wiki` and you also now how to look up all release. So that
-should be a problem anymore. So let's delete the release with:
+To delete a release, you need to know the name of the release. In our case, we
+know the name is `wiki`. But we also know how to look up releases, so that
+should be no problem anymore. Let's delete the release with:
 
 ```bash
 helm del wiki --purge
+```
+
+```
 release "wiki" deleted
 ```
 
-With the `--purge` option you make sure that really ALL resources of that release
-should be deleted. Did that work? Let's do the `list` operation again:
+With the `--purge` option, you make sure that really ALL resources of that release
+are deleted. Did that work? Let's do the `list` operation again:
 
 ```bash
 helm ls
 ```
 
-That seems to be empty. Let's check with `kubectl`.
+Seems to be empty. Let's check with `kubectl`.
 
 ```
 kubectl get all --all-namespaces
+```
+
+```
 NAMESPACE     NAME                                        READY     STATUS    RESTARTS   AGE
 kube-system   pod/etcd-minikube                           1/1       Running   0          1h
 kube-system   pod/kube-addon-manager-minikube             1/1       Running   1          1d
@@ -228,11 +259,14 @@ kube-system   replicaset.apps/kubernetes-dashboard-5498ccf677   1         1     
 tools         replicaset.apps/tiller-deploy-66998d5d74          1         1         1         1d
 ```
 
-So no wiki anymore? Yes it's gone! Okay fine let's redeploy it to the `tools`
+So no more wiki? Yes! It's gone! Okay fine, let's redeploy it to the `tools`
 Namespace.
 
 ```
 helm install --name wiki --namespace tools stable/dokuwiki
+```
+
+```
 NAME:   wiki
 LAST DEPLOYED: Wed Jul 18 22:11:07 2018
 NAMESPACE: tools
@@ -279,7 +313,7 @@ NOTES:
   echo Password: $(kubectl get secret --namespace tools wiki-dokuwiki -o jsonpath="{.data.dokuwiki-password}" | base64 --decode)
 ```
 
-The command stays pretty much the same except that you now set the Namespace
+The command stays pretty much the same, except that we now set the Namespace
 with the `--namespace` flag. If you like you can perform the same actions we did
 when we first deployed the service (check the status of the Pods and do the 
 port forwarding).
@@ -292,4 +326,5 @@ release "wiki" deleted
 ```
 
 Now it's time to move on. In [Part IV](../part-04/README.md) you will create
-a `Chart` from scratch. Don't worry you will repeat the management of `Charts`.
+a `Chart` from scratch. Don't worry we will also repeat the management of
+`Charts`.
