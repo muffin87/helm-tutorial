@@ -63,15 +63,15 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    component: "{{ .Values.ghost.statefulset.labels.component }}"
+    component: "{{ .Values.ghost.deployment.labels.component }}"
 
 spec:
-  replicas: {{ .Values.ghost.statefulset.replicas }}
+  replicas: {{ .Values.ghost.deployment.replicas }}
 
   selector:
     matchLabels:
       app: {{ template "ghost.fullname" . }}
-      component: {{ .Values.ghost.statefulset.labels.component }}
+      component: {{ .Values.ghost.deployment.labels.component }}
 
   template:
     metadata:
@@ -80,13 +80,13 @@ spec:
         heritage: {{ .Release.Service }}
         release: {{ .Release.Name }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        component: {{ .Values.ghost.statefulset.labels.component }}
+        component: {{ .Values.ghost.deployment.labels.component }}
 
     spec:
       containers:
-      - name: {{ .Values.ghost.statefulset.dockerImage }}
+      - name: {{ .Values.ghost.deployment.dockerImage }}
 
-        image: "{{ .Values.ghost.statefulset.dockerImage }}:{{ .Values.ghost.statefulset.dockerTag }}"
+        image: "{{ .Values.ghost.deployment.dockerImage }}:{{ .Values.ghost.deployment.dockerTag }}"
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
 
         env:
@@ -104,30 +104,30 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.statefulset.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.statefulset.readiness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.ghost.statefulset.readiness.timeoutSeconds }}
+            port: {{ .Values.ghost.deployment.ports.port }}
+          initialDelaySeconds: {{ .Values.ghost.deployment.readiness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.ghost.deployment.readiness.timeoutSeconds }}
 
         livenessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.statefulset.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.statefulset.liveness.initialDelaySeconds }}
-          periodSeconds: {{ .Values.ghost.statefulset.liveness.periodSeconds }}
-          timeoutSeconds: {{ .Values.ghost.statefulset.liveness.timeoutSeconds }}
+            port: {{ .Values.ghost.deployment.ports.port }}
+          initialDelaySeconds: {{ .Values.ghost.deployment.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.ghost.deployment.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.ghost.deployment.liveness.timeoutSeconds }}
 
         resources:
           requests:
-            cpu: {{ .Values.ghost.statefulset.resources.requests.cpu }}
-            memory: {{ .Values.ghost.statefulset.resources.requests.mem }}
+            cpu: {{ .Values.ghost.deployment.resources.requests.cpu }}
+            memory: {{ .Values.ghost.deployment.resources.requests.mem }}
           limits:
-            cpu: {{ .Values.ghost.statefulset.resources.limits.cpu }}
-            memory: {{ .Values.ghost.statefulset.resources.limits.mem }}
+            cpu: {{ .Values.ghost.deployment.resources.limits.cpu }}
+            memory: {{ .Values.ghost.deployment.resources.limits.mem }}
 
         ports:
-        - name: {{ .Values.ghost.statefulset.ports.name }}
-          protocol: {{ .Values.ghost.statefulset.ports.protocol }}
-          containerPort: {{ .Values.ghost.statefulset.ports.port }}
+        - name: {{ .Values.ghost.deployment.ports.name }}
+          protocol: {{ .Values.ghost.deployment.ports.protocol }}
+          containerPort: {{ .Values.ghost.deployment.ports.port }}
 
 ```
 
@@ -156,7 +156,7 @@ ghost:
   databaseClient: "mysql"                           # The database to use
 
   # deployment section
-  statefulset:
+  deployment:
     replicas: 1                                     # The number of replicas when deployed
     dockerImage: "ghost"                            # The docker image to use
     dockerTag: "1.24.8-alpine"                      # The docker tags to use
@@ -187,7 +187,7 @@ ghost:
 
     # Port section
     ports:
-      name: "web"                                   # The name of the port
+      name: web                                     # The name of the port
       protocol: TCP                                 # The protocol to use
       port: 2368                                    # The port number to use
       targetPort: 2368                              # The target port for the service object
@@ -199,7 +199,6 @@ mysql:
   mysqlUser: "ghost"                                # The username to use
   mysqlPassword: "myAwesomeBlog"                    # The password for the user
   mysqlDatabase: "ghost"                            # The database to use
-
 ```
 
 We need to fill the environment vars mentioned in the Deployment. The
