@@ -11,4 +11,4 @@ spec:
       paths:
       - backend:
           serviceName: {{ .Release.Name }}
-          servicePort: {{ .Values.ghost.statefulset.ports.port }}
+          servicePort: {{ .Values.ghost.deployment.ports.port }}

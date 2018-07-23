@@ -15,7 +15,7 @@ ghost:
   databaseClient: "mysql"                           # The database to use
 
   # deployment section
-  statefulset:
+  deployment:
     replicas: 1                                     # The number of replicas when deployed
     dockerImage: "ghost"                            # The docker image to use
     dockerTag: "1.24.8-alpine"                      # The docker tags to use
