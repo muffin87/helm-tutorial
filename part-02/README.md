@@ -30,13 +30,13 @@ you can also find a Helm package for Homebrew and Chocolatey.
 
 Homebrew:
 
-```
+```bash
 brew install kubernetes-helm
 ```
 
 Chocolaety:
 
-```
+```bash
 choco install kubernetes-helm
 ```
 
@@ -56,14 +56,14 @@ in a production environment. For this tutorial we start off with a insecure
 version. How to secure the tiller on different levels and will be touched in 
 [Part VIII: Multi-tenancy installation](../part-08/README.md).*
 
-```
+```bash
 helm init --tiller-namespace tools --debug
 ```
 
 This will setup the `tiller` in the `tools` Namespace. I have also added the
 `--debug` command that we have a little more more output what's going one.
 
-```
+```yaml
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -157,7 +157,7 @@ never talk to the Pod directly.
 
 Let's check out if we see something inside our Kubernetes cluster:
 
-```
+```bash
 kubectl -n tools get all -l name=tiller -o wide
 NAME                                 READY     STATUS    RESTARTS   AGE       IP           NODE
 pod/tiller-deploy-66998d5d74-9d2gc   1/1       Running   0          23m       172.17.0.4   minikube
@@ -178,7 +178,7 @@ to the Deployment.
 So now our `tiller` is running but how do you communicate with it? When you don't
 use the default Namespace we need to tell your client where to find your `tiller`.
 
-```
+```bash
 helm version
 Client: &version.Version{SemVer:"v2.9.1", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
 ```
@@ -186,7 +186,7 @@ Client: &version.Version{SemVer:"v2.9.1", GitCommit:"20adb27c7c5868466912eebdf66
 You will notice that the command hangs. So let's try to define the `tiller` 
 Namespace.
 
-````
+````bash
 export TILLER_NAMESPACE=tools
 helm version
 Client: &version.Version{SemVer:"v2.9.1", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
@@ -206,7 +206,7 @@ ClusterRoleBinding for our local dev environment approach. Please follow
 [Part VIII](../part-08/README.md) for a more secure production ready solution.
 Please apply / create the ClusterRoleBinding:
 
-```
+```bash
 kubectl create -f part-02/templates/tiller-rbac.yml
 clusterrolebinding.rbac.authorization.k8s.io/tiller created
 ```
