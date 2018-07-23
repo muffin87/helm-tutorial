@@ -1,10 +1,10 @@
 # Part VII: Dependency management
 
 In this part we will take a look at dependency management. With Helm you can
-define dependencies which should be deployed together with your application. This
-can be really helpful, when you have a bunch of applications which need to work
-together. Instead of creating a very big chart, which contains every application,
-you can try to split them up and create multiple charts.
+define dependencies which should be deployed together with your application. 
+This can be really helpful, when you have a bunch of applications which need to
+work together. Instead of creating a very big chart, which contains every 
+application, you can try to split them up and create multiple charts.
 
 _Note: It's very hard to give you a clear threshold when to split up your charts.
 An indicator could be when the `values.yaml` gets very complex and too long._
@@ -14,14 +14,14 @@ An indicator could be when the `values.yaml` gets very complex and too long._
 When you define dependencies you need to create a file called `requirements.yaml`.
 We will go through the process of setting up such a file, of course, with an
 example: Let's take a look back at our Ghost application. In the first part we
-ran our blog software with a SQLite database. Imagine xou are now facing the
+ran our blog software with a SQLite database. Imagine you are now facing the
 problem that the traffic on your running blog instance is very high and the
 latency increases. After taking a look in your monitoring system, you notice
 that the database is the bottleneck (high IO on the SQLite partition).
 You now have a few options like using faster storage or try to add a cache.
 For our example we will try to switch the database from SQLite to MySQL. With
 MySQL you can use Master Slave replications which scale much better.
-So we need to modify our Ghost chart. First we will create a
+So we need to modify our Ghost Chart. First we will create a
 `requirements.yaml` file:
 
 ```bash
@@ -37,24 +37,21 @@ dependencies:
   repository: "https://kubernetes-charts.storage.googleapis.com/"
 ```
 
-You need to know the name of the chart you want to include as well as the 
+You need to know the name of the Chart you want to include as well as the 
 version and the repository where to find it. For MySQL you can look up this info
 [here](https://github.com/helm/charts/blob/master/stable/mysql/Chart.yaml).
 
-To match the new requirements we will need to change some things. First we will
-convert our Statefulset into a Deployment. We removed our `volume` section as 
-well as the `VolumeClaimTemplate`. This is because MySQL is a separate
-container. So our Ghost container does not need to handle state anymore.
+To match the new requirements we will need to change some things. Mainly we need
+to tell Ghost to connect to our MySQL Database:
 
-```
-mv ghost/templates/ghost_statefulset.yaml ghost/templates/ghost_deployment.yaml
-```
-
-The transformed Deployment looks like this (`ghost_deployment.yaml`):
+_Note: You may wonder why we don't convert the Statefulset to a Deployment since
+we have a external database to persist our data. Ghost stores not all
+information into the database. Images and other uploads will remain on disk. In
+our case in the PersistentVolume of the Statefulset._
 
 ```yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
@@ -64,15 +61,16 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    component: "{{ .Values.ghost.deployment.labels.component }}"
+    component: "{{ .Values.statefulset.labels.component }}"
 
 spec:
-  replicas: {{ .Values.ghost.deployment.replicas }}
+  serviceName: {{ .Release.Name }}
+  replicas: {{ .Values.statefulset.replicas }}
 
   selector:
     matchLabels:
       app: {{ template "ghost.fullname" . }}
-      component: {{ .Values.ghost.deployment.labels.component }}
+      component: {{ .Values.statefulset.labels.component }}
 
   template:
     metadata:
@@ -81,18 +79,18 @@ spec:
         heritage: {{ .Release.Service }}
         release: {{ .Release.Name }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        component: {{ .Values.ghost.deployment.labels.component }}
+        component: {{ .Values.statefulset.labels.component }}
 
     spec:
       containers:
-      - name: {{ .Values.ghost.deployment.dockerImage }}
+      - name: {{ .Values.statefulset.dockerImage }}
 
-        image: "{{ .Values.ghost.deployment.dockerImage }}:{{ .Values.ghost.deployment.dockerTag }}"
+        image: "{{ .Values.statefulset.dockerImage }}:{{ .Values.statefulset.dockerTag }}"
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
 
         env:
         - name: "database__client"
-          value: "{{ .Values.ghost.databaseClient }}"
+          value: "{{ .Values.databaseClient }}"
         - name: "database__connection__host"
           value: "{{ .Release.Name }}-mysql"
         - name: "database__connection__user"
@@ -105,35 +103,49 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.deployment.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.deployment.readiness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.ghost.deployment.readiness.timeoutSeconds }}
+            port: {{ .Values.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.statefulset.readiness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.statefulset.readiness.timeoutSeconds }}
 
         livenessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.deployment.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.deployment.liveness.initialDelaySeconds }}
-          periodSeconds: {{ .Values.ghost.deployment.liveness.periodSeconds }}
-          timeoutSeconds: {{ .Values.ghost.deployment.liveness.timeoutSeconds }}
+            port: {{ .Values.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.statefulset.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.statefulset.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.statefulset.liveness.timeoutSeconds }}
 
         resources:
           requests:
-            cpu: {{ .Values.ghost.deployment.resources.requests.cpu }}
-            memory: {{ .Values.ghost.deployment.resources.requests.mem }}
+            cpu: {{ .Values.statefulset.resources.requests.cpu }}
+            memory: {{ .Values.statefulset.resources.requests.mem }}
           limits:
-            cpu: {{ .Values.ghost.deployment.resources.limits.cpu }}
-            memory: {{ .Values.ghost.deployment.resources.limits.mem }}
+            cpu: {{ .Values.statefulset.resources.limits.cpu }}
+            memory: {{ .Values.statefulset.resources.limits.mem }}
 
         ports:
-        - name: {{ .Values.ghost.deployment.ports.name }}
-          protocol: {{ .Values.ghost.deployment.ports.protocol }}
-          containerPort: {{ .Values.ghost.deployment.ports.port }}
+        - name: {{ .Values.statefulset.ports.name }}
+          protocol: {{ .Values.statefulset.ports.protocol }}
+          containerPort: {{ .Values.statefulset.ports.port }}
+
+        volumeMounts:
+        - mountPath: /var/lib/ghost/content
+          name: content
+
+  volumeClaimTemplates:
+  - metadata:
+      name: content
+      namespace: {{ .Release.Namespace }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 500Mi
 
 ```
 
-We changed the `kind` from `Statefulset` to `Deployment` and removed the 
-`serviceName`. We also added a bunch of environment variables to configure
+We added a bunch of environment variables to configure
 the database connection for Ghost (see `env` section). All available env vars 
 are listed [here](https://docs.ghost.org/docs/config#section-running-ghost-with-config-env-variables).
 
@@ -147,51 +159,49 @@ We also need to add some things to our `values.yaml`:
 global:
   imagePullPolicy: "Always"                         # The Kubernetes image pull policy
   domain: "example"                                 # The domain to use
-  timezone: "Europe/Berlin"                         # The default timezone
 
 # Ghost section
-ghost:
 
-  # general section
-  ingressUrl: "myawesomeblog"                       # The Ingress URL to use
-  databaseClient: "mysql"                           # The database to use
+# general section
+ingressUrl: "myawesomeblog"                       # The Ingress URL to use
+databaseClient: "mysql"                           # The database to use
 
-  # deployment section
-  deployment:
-    replicas: 1                                     # The number of replicas when deployed
-    dockerImage: "ghost"                            # The docker image to use
-    dockerTag: "1.24.8-alpine"                      # The docker tags to use
+# statefulset section
+statefulset:
+  replicas: 1                                     # The number of replicas when deployed
+  dockerImage: "ghost"                            # The docker image to use
+  dockerTag: "1.24.8-alpine"                      # The docker tags to use
 
-    # Label section
-    labels:
-      component: "frontend"                         # The component label to use
+  # Label section
+  labels:
+    component: "frontend"                         # The component label to use
 
-    # Resource section
-    resources:
-      requests:
-        mem: "200Mi"                                # The initial amount of memory ghost requests
-        cpu: "200m"                                 # The initial amount of cpu ghost requests
-      limits:
-        mem: "200Mi"                                # The maximum amount of memory ghost can consume before it will get killed
-        cpu: "200m"                                 # The maximum amount of cpu ghost can consume
+  # Resource section
+  resources:
+    requests:
+      mem: "200Mi"                                # The initial amount of memory ghost requests
+      cpu: "200m"                                 # The initial amount of cpu ghost requests
+    limits:
+      mem: "200Mi"                                # The maximum amount of memory ghost can consume before it will get killed
+      cpu: "200m"                                 # The maximum amount of cpu ghost can consume
 
-    # Readiness probe
-    readiness:
-      initialDelaySeconds: 90                       # The initial delay before the readiness probe starts
-      timeoutSeconds: 5                             # The timeout for the readiness probe
+  # Readiness probe
+  readiness:
+    initialDelaySeconds: 120                      # The initial delay before the readiness probe starts
+    timeoutSeconds: 5                             # The timeout for the readiness probe
 
-    # Liveness probe
-    liveness:
-      initialDelaySeconds: 90                       # The initial delay after the readiness probe has finished
-      timeoutSeconds: 5                             # The timeout for liveness probe
-      periodSeconds: 10                             # The interval in which the liveness probe should be executed
+  # Liveness probe
+  liveness:
+    initialDelaySeconds: 120                      # The initial delay after the readiness probe has finished
+    timeoutSeconds: 5                             # The timeout for liveness probe
+    periodSeconds: 10                             # The interval in which the liveness probe should be executed
 
-    # Port section
-    ports:
-      name: web                                     # The name of the port
-      protocol: TCP                                 # The protocol to use
-      port: 2368                                    # The port number to use
-      targetPort: 2368                              # The target port for the service object
+  # Port section
+  ports:
+    name: web                                     # The name of the port
+    protocol: TCP                                 # The protocol to use
+    port: 2368                                    # The port number to use
+    targetPort: 2368                              # The target port for the service object
 
 # MySQL section
 mysql:
@@ -200,6 +210,7 @@ mysql:
   mysqlUser: "ghost"                                # The username to use
   mysqlPassword: "myAwesomeBlog"                    # The password for the user
   mysqlDatabase: "ghost"                            # The database to use
+
 ```
 
 We need to fill the environment vars mentioned in the Deployment. The
@@ -384,6 +395,3 @@ helm del blog --purge
 ```
 release "blog" deleted
 ```
-
-In the [final section](../part-08/README.md) of the tutorial we will see how
-to setup our `tiller` for multi tenancy in a more production like use case.
