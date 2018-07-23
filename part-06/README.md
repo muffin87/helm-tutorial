@@ -84,7 +84,7 @@ and your requirements to see what matches. In this tutorial we will use the
 `chartmuseum` since I think it's a pretty flexible solution and not so hard
 to setup.
 
-## chartmuseum
+## Chartmuseum
 
 [chartmuseum](https://github.com/helm/chartmuseum) is a open source Helm Chart
 repository with support for the most common object storage implementations.
@@ -125,7 +125,7 @@ the `ALLOW_OVERWRITE` in order to push the same version of chart multiple times.
 
 When everything has worked out you should now have a running Pod:
 
-```bash
+```
 kubectl -n tools get all -l "app=chartmuseum"
 NAME                                         READY     STATUS    RESTARTS   AGE
 pod/helm-repo-chartmuseum-568b9f848d-xmhcr   1/1       Running   0          9m
@@ -184,7 +184,7 @@ helm repo add helm-repo http://localhost:8080
 
 Check if you can see the repo in our repo index:
 
-```bash
+```
 helm repo list
 NAME            URL
 stable          https://kubernetes-charts.storage.googleapis.com
@@ -207,7 +207,7 @@ Update Complete. ⎈ Happy Helming!⎈
 
 And we can try to search in our repo with:
 
-```bash
+```
 curl -Lv http://localhost:8080/api/charts | jq '.'
  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
@@ -319,7 +319,7 @@ Done.
 We have successfully pushed our chart. We should try if we can deploy Ghost from
 our repo. We first need to update the repo data and than we can deploy the Chart:
 
-```bash
+```
 helm repo update
 
 helm install --name blog --namespace=tools helm-repo/ghost
@@ -355,4 +355,4 @@ helm del blog --purge
 release "blog" deleted
 ```
 
-In [Part 7](../part-07/README.md) we will look at dependency management.
+In [Part VII](../part-07/README.md) we will look at dependency management.
