@@ -367,7 +367,7 @@ you can use `--dry-run` to just render the template and not deploy it. This can
 be very helpful when you just want to check if the templates are correctly
 renders. 
 
-```bash
+```
 helm install --name blog --namespace=tools ./ghost --debug
 [debug] Created tunnel using local port: '51496'
 
@@ -581,7 +581,7 @@ resources with `kubectl`.
 Now let's see if our blog is running by taking a look at the deployed resources
 again.
 
-```bash
+```
 kubectl -n tools get all -l "app=blog-ghost"
 NAME    REVISION        UPDATED                         STATUS          CHART           NAMESPACE
 blog    1               Sat Jul 21 09:18:33 2018        DEPLOYED        ghost-1.24.8    tools
@@ -605,4 +605,4 @@ kubectl -n tools port-forward blog-0 2368:2368
 You should now be able to see the blog when you open a browser and
 enter `localhost:2368`.
 
-In [part 5](../part-05/README.md) we will take a look how to manipulate releases.
+In [Part V](../part-05/README.md) we will take a look how to manipulate releases.
