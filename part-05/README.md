@@ -18,7 +18,7 @@ Ghost. This means we need to update the docker tag, which is defined in the
 Now let's try to update our chart. (I included the updated chart under
 `part-05/templates/ghost`).
 
-```bash
+```
 helm upgrade blog ghost/
 Release "blog" has been upgraded. Happy Helming!
 LAST DEPLOYED: Sat Jul 21 13:14:43 2018
@@ -49,7 +49,7 @@ Kubernetes will handel the update for us. This means it will terminate the Pod
 and create a new one with the new docker image. To verify that our changed
 was successfully applied we can do the following:
 
-```bash
+```
 kubectl -n tools describe pod blog-0 | grep Image
    Image:          ghost:1.24.9-alpine
    Image ID:       docker-pullable://ghost@sha256:6aa66615f623a35289ab5f3f9026617fb2f2ab07d9d45f2091dad9381139a3ab
@@ -125,7 +125,7 @@ let us rollback to the first revision.
 For this use case Helm implemented a rollback function. Will simply need to
 execute the following:
 
-```bash
+```
 helm rollback blog 1
 Rollback was a success! Happy Helming!
 ```
@@ -134,7 +134,7 @@ So we used the `rollback` command with the name of the release and the revision
 number we want to rollback to. In our case `1` for the first release. Let's 
 check out if we are using the old docker image again.
 
-```bash
+```
 kubectl -n tools describe pod blog-0 | grep Image
     Image:          ghost:1.24.8-alpine
     Image ID:       docker-pullable://ghost@sha256:0078e645794188d4d1d6c63455bce697a8eaf3a14435323b150a8b40ed2e03a6
@@ -150,4 +150,4 @@ release "blog" deleted
 
 Now that we can create and install Charts and also handel releases we should 
 take a look at how to package and host Charts. This will be explained 
-in [Part 6](../part-06/README.md).
+in [Part VI](../part-06/README.md).
