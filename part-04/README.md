@@ -50,10 +50,11 @@ touch Chart.yaml README.md values.yaml templates/NOTES.txt
 Next you need to open this dir with an editor of your choice.
 We start with editing the `Chart.yaml` file:
 
-```yaml
+````yaml
 name: ghost
 home: https://ghost.org/de/
-version: 1.24.8
+appVersion: 1.24.8
+version: 1.0.0
 description: Ghost is a free and open source blogging platform written in JavaScript and
   distributed under the MIT License, designed to simplify the process of online
   publishing for individual bloggers as well as online publications.
@@ -61,13 +62,15 @@ sources:
 - https://hub.docker.com/_/ghost/
 - https://github.com/TryGhost/Ghost
 maintainers:
-- name: Max Mustermann
-  email: max.mustermann@example.com
+- name: Fabian Müller
+  email: fabian.mueller@example.com
 icon: http://www.juliosblog.com/content/images/2016/12/Ghost_icon.png
-```
+````
 
 In this file we will collect the basic metadata for the chart. Every chart needs
-a `name` a `version` and a `description`. The `home` key is optional but useful
+a `name` a `version` and a `description`. With `version` we reference to the
+version of the Chart. In addition there is the `appVersion` which reflects the
+version of the packaged software. The `home` key is optional but useful
 to point to the official website of an application. In addition to that, you can
 define links to `sources`. It can also very helpful to define maintainers
 of a chart, so you can contact that person in case of questions or
@@ -100,12 +103,13 @@ metadata:
 
 spec:
   rules:
-  - host: "{{ .Values.ghost.ingressUrl }}.{{ .Values.global.domain }}"
+  - host: "{{ .Values.ingressUrl }}.{{ .Values.global.domain }}"
     http:
       paths:
       - backend:
           serviceName: {{ .Release.Name }}
-          servicePort: {{ .Values.ghost.statefulset.ports.port }}
+          servicePort: {{ .Values.statefulset.ports.port }}
+
 ```
 
 This looks like a normal Kubernetes manifest file right? The only difference you
@@ -145,18 +149,18 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    component: "{{ .Values.ghost.statefulset.labels.component }}"
+    component: {{ .Values.statefulset.labels.component }}
 
 spec:
   selector:
     app: {{ template "ghost.fullname" . }}
-    component: "{{ .Values.ghost.statefulset.labels.component }}"
+    component: {{ .Values.statefulset.labels.component }}
 
   ports:
-    - name: {{ .Values.ghost.statefulset.ports.name }}
-      port: {{ .Values.ghost.statefulset.ports.port }}
-      protocol: {{ .Values.ghost.statefulset.ports.protocol }}
-      targetPort: {{ .Values.ghost.statefulset.ports.targetPort }}
+    - name: {{ .Values.statefulset.ports.name }}
+      port: {{ .Values.statefulset.ports.port }}
+      protocol: {{ .Values.statefulset.ports.protocol }}
+      targetPort: {{ .Values.statefulset.ports.targetPort }}
 
 ```
 
@@ -224,16 +228,16 @@ metadata:
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    component: "{{ .Values.ghost.statefulset.labels.component }}"
+    component: "{{ .Values.statefulset.labels.component }}"
 
 spec:
   serviceName: {{ .Release.Name }}
-  replicas: {{ .Values.ghost.statefulset.replicas }}
+  replicas: {{ .Values.statefulset.replicas }}
 
   selector:
     matchLabels:
       app: {{ template "ghost.fullname" . }}
-      component: "{{ .Values.ghost.statefulset.labels.component }}"
+      component: {{ .Values.statefulset.labels.component }}
 
   template:
     metadata:
@@ -242,42 +246,42 @@ spec:
         heritage: {{ .Release.Service }}
         release: {{ .Release.Name }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-        component: "{{ .Values.ghost.statefulset.labels.component }}"
+        component: {{ .Values.statefulset.labels.component }}
 
     spec:
       containers:
-      - name: {{ .Values.ghost.statefulset.dockerImage }}
+      - name: {{ .Values.statefulset.dockerImage }}
 
-        image: "{{ .Values.ghost.statefulset.dockerImage }}:{{ .Values.ghost.statefulset.dockerTag }}"
+        image: "{{ .Values.statefulset.dockerImage }}:{{ .Values.statefulset.dockerTag }}"
         imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
 
         readinessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.statefulset.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.statefulset.readiness.initialDelaySeconds }}
-          timeoutSeconds: {{ .Values.ghost.statefulset.readiness.timeoutSeconds }}
+            port: {{ .Values.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.statefulset.readiness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.statefulset.readiness.timeoutSeconds }}
 
         livenessProbe:
           httpGet:
             path: /
-            port: {{ .Values.ghost.statefulset.ports.port }}
-          initialDelaySeconds: {{ .Values.ghost.statefulset.liveness.initialDelaySeconds }}
-          periodSeconds: {{ .Values.ghost.statefulset.liveness.periodSeconds }}
-          timeoutSeconds: {{ .Values.ghost.statefulset.liveness.timeoutSeconds }}
+            port: {{ .Values.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.statefulset.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.statefulset.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.statefulset.liveness.timeoutSeconds }}
 
         resources:
           requests:
-            cpu: {{ .Values.ghost.statefulset.resources.requests.cpu }}
-            memory: {{ .Values.ghost.statefulset.resources.requests.mem }}
+            cpu: {{ .Values.statefulset.resources.requests.cpu }}
+            memory: {{ .Values.statefulset.resources.requests.mem }}
           limits:
-            cpu: {{ .Values.ghost.statefulset.resources.limits.cpu }}
-            memory: {{ .Values.ghost.statefulset.resources.limits.mem }}
+            cpu: {{ .Values.statefulset.resources.limits.cpu }}
+            memory: {{ .Values.statefulset.resources.limits.mem }}
 
         ports:
-        - name: {{ .Values.ghost.statefulset.ports.name }}
-          protocol: {{ .Values.ghost.statefulset.ports.protocol }}
-          containerPort: {{ .Values.ghost.statefulset.ports.port }}
+        - name: {{ .Values.statefulset.ports.name }}
+          protocol: {{ .Values.statefulset.ports.protocol }}
+          containerPort: {{ .Values.statefulset.ports.port }}
 
         volumeMounts:
         - mountPath: /var/lib/ghost/content
@@ -309,52 +313,51 @@ global:
   timezone: "Europe/Berlin"                         # The default timezone
 
 # Ghost section
-ghost:
 
-  # general section
-  ingressUrl: "myawesomeblog"                       # The Ingress URL to use
+# general section
+ingressUrl: "myawesomeblog"                       # The Ingress URL to use
 
-  # statefulset section
-  statefulset:
-    replicas: 1                                     # The number of replicas when deployed
-    dockerImage: "ghost"                            # The docker image to use
-    dockerTag: "1.24.8-alpine"                      # The docker tags to use
+# statefulset section
+statefulset:
+  replicas: 1                                     # The number of replicas when deployed
+  dockerImage: "ghost"                            # The docker image to use
+  dockerTag: "1.24.8-alpine"                      # The docker tags to use
 
-    # Label section
-    labels:
-      component: "frontend"                         # The component label to use
+  # Label section
+  labels:
+    component: "frontend"                         # The component label to use
 
-    # Resource section
-    resources:
-      requests:
-        mem: "200Mi"                                # The initial amount of memory ghost requests
-        cpu: "200m"                                 # The initial amount of cpu ghost requests
-      limits:
-        mem: "200Mi"                                # The maximum amount of memory ghost can consume before it will get killed
-        cpu: "200m"                                 # The maximum amount of cpu ghost can consume
+  # Resource section
+  resources:
+    requests:
+      mem: "200Mi"                                # The initial amount of memory ghost requests
+      cpu: "200m"                                 # The initial amount of cpu ghost requests
+    limits:
+      mem: "200Mi"                                # The maximum amount of memory ghost can consume before it will get killed
+      cpu: "200m"                                 # The maximum amount of cpu ghost can consume
 
-    # Readiness probe
-    readiness:
-      initialDelaySeconds: 30                       # The initial delay before the readiness probe starts
-      timeoutSeconds: 5                             # The timeout for the readiness probe
+  # Readiness probe
+  readiness:
+    initialDelaySeconds: 30                       # The initial delay before the readiness probe starts
+    timeoutSeconds: 5                             # The timeout for the readiness probe
 
-    # Liveness probe
-    liveness:
-      initialDelaySeconds: 30                       # The initial delay after the readiness probe has finished
-      timeoutSeconds: 5                             # The timeout for liveness probe
-      periodSeconds: 10                             # The interval in which the liveness probe should be executed
+  # Liveness probe
+  liveness:
+    initialDelaySeconds: 30                       # The initial delay after the readiness probe has finished
+    timeoutSeconds: 5                             # The timeout for liveness probe
+    periodSeconds: 10                             # The interval in which the liveness probe should be executed
 
-    # Port section
-    ports:
-      name: web                                     # The name of the port
-      protocol: TCP                                 # The protocol to use
-      port: 2368                                    # The port number to use
-      targetPort: 2368                              # The target port for the service object
+  # Port section
+  ports:
+    name: web                                     # The name of the port
+    protocol: TCP                                 # The protocol to use
+    port: 2368                                    # The port number to use
+    targetPort: 2368                              # The target port for the service object
 
 ```
 
 Here you will find all variables used in this chart.
-Accessing the varibales follows the normal YAML rules. When you want to use
+Accessing the variables follows the normal YAML rules. When you want to use
 for example the name of the port (`name: web`) you would reference it like this:
 
 ```gotemplate
@@ -375,52 +378,51 @@ helm install --name blog --namespace=tools ./ghost --debug
 ```
 
 ```
-[debug] Created tunnel using local port: '51496'
+[debug] Created tunnel using local port: '57598'
 
-[debug] SERVER: "127.0.0.1:51496"
+[debug] SERVER: "127.0.0.1:57598"
 
 [debug] Original chart version: ""
 [debug] CHART PATH: /Users/mll0005f/Documents/repository/github.com/helm-tutorial/part-04/templates/ghost
 
 NAME:   blog
 REVISION: 1
-RELEASED: Sat Jul 21 10:56:47 2018
-CHART: ghost-1.24.8
+RELEASED: Mon Jul 23 19:52:22 2018
+CHART: ghost-1.0.0
 USER-SUPPLIED VALUES:
 {}
 
 COMPUTED VALUES:
-ghost:
-  ingressUrl: myawesomeblog
-  statefulset:
-    dockerImage: ghost
-    dockerTag: 1.24.8-alpine
-    labels:
-      component: frontend
-    liveness:
-      initialDelaySeconds: 30
-      periodSeconds: 10
-      timeoutSeconds: 5
-    ports:
-      name: web
-      port: 2368
-      protocol: TCP
-      targetPort: 2368
-    readiness:
-      initialDelaySeconds: 30
-      timeoutSeconds: 5
-    replicas: 1
-    resources:
-      limits:
-        cpu: 200m
-        mem: 200Mi
-      requests:
-        cpu: 200m
-        mem: 200Mi
 global:
   domain: example
   imagePullPolicy: Always
   timezone: Europe/Berlin
+ingressUrl: myawesomeblog
+statefulset:
+  dockerImage: ghost
+  dockerTag: 1.24.8-alpine
+  labels:
+    component: frontend
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  ports:
+    name: web
+    port: 2368
+    protocol: TCP
+    targetPort: 2368
+  readiness:
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      mem: 200Mi
+    requests:
+      cpu: 200m
+      mem: 200Mi
 
 HOOKS:
 MANIFEST:
@@ -437,13 +439,13 @@ metadata:
     app: blog-ghost
     heritage: Tiller
     release: blog
-    chart: "ghost-1.24.8"
-    component: "frontend"
+    chart: "ghost-1.0.0"
+    component: frontend
 
 spec:
   selector:
     app: blog-ghost
-    component: "frontend"
+    component: frontend
 
   ports:
     - name: web
@@ -462,7 +464,7 @@ metadata:
     app: blog-ghost
     heritage: Tiller
     release: blog
-    chart: "ghost-1.24.8"
+    chart: "ghost-1.0.0"
     component: "frontend"
 
 spec:
@@ -472,7 +474,7 @@ spec:
   selector:
     matchLabels:
       app: blog-ghost
-      component: "frontend"
+      component: frontend
 
   template:
     metadata:
@@ -480,8 +482,8 @@ spec:
         app: blog-ghost
         heritage: Tiller
         release: blog
-        chart: "ghost-1.24.8"
-        component: "frontend"
+        chart: "ghost-1.0.0"
+        component: frontend
 
     spec:
       containers:
@@ -532,6 +534,7 @@ spec:
       resources:
         requests:
           storage: 500Mi
+---
 # Source: ghost/templates/ghost_ingress.yaml
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -547,26 +550,22 @@ spec:
       - backend:
           serviceName: blog
           servicePort: 2368
-LAST DEPLOYED: Sat Jul 21 10:56:47 2018
+LAST DEPLOYED: Mon Jul 23 19:52:22 2018
 NAMESPACE: tools
 STATUS: DEPLOYED
 
 RESOURCES:
 ==> v1/Service
 NAME  TYPE       CLUSTER-IP    EXTERNAL-IP  PORT(S)   AGE
-blog  ClusterIP  10.98.200.49  <none>       2368/TCP  0s
+blog  ClusterIP  10.107.65.68  <none>       2368/TCP  0s
 
 ==> v1/StatefulSet
 NAME  DESIRED  CURRENT  AGE
-blog  1        1        0s
+blog  1        0        0s
 
 ==> v1beta1/Ingress
 NAME  HOSTS                  ADDRESS  PORTS  AGE
 blog  myawesomeblog.example  80       0s
-
-==> v1/Pod(related)
-NAME    READY  STATUS             RESTARTS  AGE
-blog-0  0/1    ContainerCreating  0         0s
 ```
 
 As you can see in the output above, we get all manifest files rendered correctly.
