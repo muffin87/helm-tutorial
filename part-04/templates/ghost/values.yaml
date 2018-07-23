@@ -1,0 +1,51 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your template.
+
+# Global var section
+global:
+  imagePullPolicy: "Always"                         # The Kubernetes image pull policy
+  domain: "example"                                 # The domain to use
+  timezone: "Europe/Berlin"                         # The default timezone
+
+# Ghost section
+ghost:
+
+  # general section
+  ingressUrl: "myawesomeblog"                       # The Ingress URL to use
+
+  # statefulset section
+  statefulset:
+    replicas: 1                                     # The number of replicas when deployed
+    dockerImage: "ghost"                            # The docker image to use
+    dockerTag: "1.24.8-alpine"                      # The docker tags to use
+
+    # Label section
+    labels:
+      component: "frontend"                         # The component label to use
+
+    # Resource section
+    resources:
+      requests:
+        mem: "200Mi"                                # The initial amount of memory ghost requests
+        cpu: "200m"                                 # The initial amount of cpu ghost requests
+      limits:
+        mem: "200Mi"                                # The maximum amount of memory ghost can consume before it will get killed
+        cpu: "200m"                                 # The maximum amount of cpu ghost can consume
+
+    # Readiness probe
+    readiness:
+      initialDelaySeconds: 30                       # The initial delay before the readiness probe starts
+      timeoutSeconds: 5                             # The timeout for the readiness probe
+
+    # Liveness probe
+    liveness:
+      initialDelaySeconds: 30                       # The initial delay after the readiness probe has finished
+      timeoutSeconds: 5                             # The timeout for liveness probe
+      periodSeconds: 10                             # The interval in which the liveness probe should be executed
+
+    # Port section
+    ports:
+      name: web                                     # The name of the port
+      protocol: TCP                                 # The protocol to use
+      port: 2368                                    # The port number to use
+      targetPort: 2368                              # The target port for the service object

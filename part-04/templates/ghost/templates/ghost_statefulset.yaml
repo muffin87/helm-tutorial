@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+
+  labels:
+    app: {{ template "ghost.fullname" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    component: "{{ .Values.ghost.statefulset.labels.component }}"
+
+spec:
+  serviceName: {{ .Release.Name }}
+  replicas: {{ .Values.ghost.statefulset.replicas }}
+
+  selector:
+    matchLabels:
+      app: {{ template "ghost.fullname" . }}
+      component: {{ .Values.ghost.statefulset.labels.component }}
+
+  template:
+    metadata:
+      labels:
+        app: {{ template "ghost.fullname" . }}
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        component: {{ .Values.ghost.statefulset.labels.component }}
+
+    spec:
+      containers:
+      - name: {{ .Values.ghost.statefulset.dockerImage }}
+
+        image: "{{ .Values.ghost.statefulset.dockerImage }}:{{ .Values.ghost.statefulset.dockerTag }}"
+        imagePullPolicy: "{{ .Values.global.imagePullPolicy }}"
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.ghost.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.ghost.statefulset.readiness.initialDelaySeconds }}
+          timeoutSeconds: {{ .Values.ghost.statefulset.readiness.timeoutSeconds }}
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: {{ .Values.ghost.statefulset.ports.port }}
+          initialDelaySeconds: {{ .Values.ghost.statefulset.liveness.initialDelaySeconds }}
+          periodSeconds: {{ .Values.ghost.statefulset.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.ghost.statefulset.liveness.timeoutSeconds }}
+
+        resources:
+          requests:
+            cpu: {{ .Values.ghost.statefulset.resources.requests.cpu }}
+            memory: {{ .Values.ghost.statefulset.resources.requests.mem }}
+          limits:
+            cpu: {{ .Values.ghost.statefulset.resources.limits.cpu }}
+            memory: {{ .Values.ghost.statefulset.resources.limits.mem }}
+
+        ports:
+        - name: {{ .Values.ghost.statefulset.ports.name }}
+          protocol: {{ .Values.ghost.statefulset.ports.protocol }}
+          containerPort: {{ .Values.ghost.statefulset.ports.port }}
+
+        volumeMounts:
+        - mountPath: /var/lib/ghost/content
+          name: content
+
+  volumeClaimTemplates:
+  - metadata:
+      name: content
+      namespace: {{ .Release.Namespace }}
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: standard
+      resources:
+        requests:
+          storage: 500Mi
