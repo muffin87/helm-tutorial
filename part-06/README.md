@@ -1,15 +1,15 @@
-# Part VI: Setup a chart repo
+# Part VI: Setup a Chart repo
 
-In this part we will setup our own chart repo. This can be really helpful
-and also necessary when you want to share your charts with other teams or people.
+In this part we will setup our own Chart repo. This can be really helpful
+and also necessary when you want to share your Charts with other teams or people.
 It's also needed when you have a very complex bundle of applications which
 need to be deployed in one go. We will cover dependency management in
 [Part 7](../part-07/README.md) of this guide.
 
 ## Chart repo
 
-So what's needed to host a chart repo? It's less than you think. You basically
-need a web server which serves an `index.yaml` and you need some packaged charts.
+So what's needed to host a Chart repo? It's less than you think. You basically
+need a web server which serves an `index.yaml` and you need some packaged Charts.
 Since we use HTTP(S) to communicate with a web server, you get your charts by
 executing a GET request to the right URL. 
 
@@ -25,7 +25,7 @@ charts/
     |- mysql-1.0.0.tgz.prov
 ```
 
-The `.tgz` file is a packaged chart (we will package our Ghost chart after we
+The `.tgz` file is a packaged Chart (we will package our Ghost Chart after we
 setup the repo). There is also something called [Provenance](https://docs.helm.sh/developing_charts/#helm-provenance-and-integrity)
 which helps proving the integrity of a package. This file is optional and we
 will not cover it in this tutorial.
@@ -34,13 +34,13 @@ _Note: You should sign your packages in production when you have more than one
 team which is consuming your charts. The link provided above will give your
 detailed info how to set this up._
 
-If we want to download the mysql chart and our base URL is
+If we want to download the mysql Chart and our base URL is
 http://my-chart-repo.example.com/charts, we would do a GET on
 http://my-chart-repo.example.com/charts/mysql-1.0.0.tgz. Simple isn't it?
 
 You now wonder what the `index.yaml` is for? Well, for some operations you need
-some metadata of the charts, since the only thing we have on the web server side
-are the packaged and compressed charts and thos only have the name and the chart
+some metadata of the Charts, since the only thing we have on the web server side
+are the packaged and compressed Charts and those only have the name and the Chart
 version on them. An operation where we need the `index.yaml` would for example
 be `helm repo update`. But what metadata is actually inside that file?
 
@@ -63,8 +63,8 @@ generated: 2017-10-06T16:23:20.499029981-06:00
 
 We have some base metadata here. You should remember this information, as they
 are directly taken from the `Chart.yaml`. You can manually create the index
-file by executing the follwoing command in the directory where your packaged
-charts reside.
+file by executing the following command in the directory where your packaged
+Charts reside.
 
 ```bash
 helm repo index
@@ -77,24 +77,24 @@ repo:
 * [Use Amazon S3 / S3 Like Storage](https://github.com/hypnoglow/helm-s3)
 * [Use Google Cloud Storage](https://docs.helm.sh/developing_charts/#google-cloud-storage)
 * [Use Github Pages](https://docs.helm.sh/developing_charts/#github-pages-example)
-* [chartmuseum](https://github.com/helm/chartmuseum)
+* [Chartmuseum](https://github.com/helm/chartmuseum)
 * Commercial Software
 
 All solutions have, of course, pros and cons. You should check your use case
 and your requirements to see what matches best. In this tutorial we will use
-`chartmuseum` since I think it's a pretty flexible solution, which is easy
+`Chartmuseum` since I think it's a pretty flexible solution, which is easy
 to setup.
 
 ## Chartmuseum
 
-[chartmuseum](https://github.com/helm/chartmuseum) is a open source Helm Chart
+[Chartmuseum](https://github.com/helm/chartmuseum) is a open source Helm Chart
 repository with support for the most common object storage implementations.
 It's developed by the Helm community and provides some very nice features such
 as basic auth, tls encryption and multi tenancy. 
 
 To install it we will use? Right, Helm! To keep it simple, we will use local
 storage for our dev environment. But feel free to try out every object storage
-implementation you like. The official Helm chart say's that you will need to
+implementation you like. The official Helm Chart say's that you will need to
 provide a `custom.yaml` values files to configure the persistence. 
 
 ```yaml
@@ -120,8 +120,8 @@ We have a new command line parameter here. The `-f <valuefile>` will provide the
 option to specify an additional values file. You can add / override variables
 which differ from the standard `values.yaml`. In our case we will override the
 storage section to modify it for our needs. We will also add the
-`DISABLE_API` flag and set it to false (this is needed to upload charts) as well
-as the `ALLOW_OVERWRITE` in order to push the same version of chart multiple
+`DISABLE_API` flag and set it to false (this is needed to upload Charts) as well
+as the `ALLOW_OVERWRITE` in order to push the same version of Chart multiple
 times.
 
 If everything worked out, you should now have a running Pod:
@@ -207,7 +207,7 @@ helm-repo       http://localhost:8080
 
 Now we should try to update the repo:
 
-_Note: You need to port-forward the chartmuseum Pod for the rest of this part._
+_Note: You need to port-forward the Chartmuseum Pod for the rest of this part._
 
 ```bash
 helm repo update
@@ -262,8 +262,8 @@ curl --data-binary "@ghost-1.24.8.tgz" http://localhost:8080/api/charts
 {"saved":true}%
 ```
 
-So we just sent a `POST` request to the `api/charts` endpoint with a simple `curl` command.
-Now let's have a look again:
+So we just sent a `POST` request to the `api/charts` endpoint with a simple 
+`curl` command. Now let's have a look again:
 
 ```bash
 curl -Lv http://localhost:8080/api/charts | jq '.'
@@ -317,13 +317,12 @@ curl -Lv http://localhost:8080/api/charts | jq '.'
 }
 ```
 
-We use the same url prefix `/api/charts`, but this time just do a `GET` operation.
-Chartmuseum will return the `index.yaml` formatted as JSON. To make that output
-more human readable I like to use the [jq JSON processor](https://stedolan.github.io/jq/).
-We can see that our chart was uploaded and we see our metadata. There is also
-another option to perform the upload. A plugin for helm which is called
-[helm push](https://github.com/chartmuseum/helm-push). You can install it by
-executing:
+We use the same url prefix `/api/charts`, but this time just do a `GET` 
+operation. Chartmuseum will return the `index.yaml` formatted as JSON. To make 
+that output more human readable I like to use the  [jq JSON processor](https://stedolan.github.io/jq/). 
+We can see that our Chart was uploaded and we see our metadata. There is also 
+another option to perform the upload. A plugin for helm which is called [helm push](https://github.com/chartmuseum/helm-push).
+You can install it by executing:
 
 ```bash
 helm plugin install https://github.com/chartmuseum/helm-push
