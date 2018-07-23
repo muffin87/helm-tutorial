@@ -21,7 +21,7 @@ After that please follow the instructions on the
 it now. Please play attention to the dependencies of Minikube. When you are done, 
 open a terminal and start Minikube.
 
-```bash
+```
 minikube start
 Starting local Kubernetes v1.10.0 cluster...
 Starting VM...
@@ -80,7 +80,7 @@ namespace/tools created
 
 Verify that everything worked as expected:
 
-```bash
+```
 kubectl get namespaces
 NAME          STATUS    AGE
 default       Active    12m
@@ -92,4 +92,4 @@ test          Active    41s
 tools         Active    41s
 ```
 
-Now you are ready to go on with [Part 2](../part-02/README.md).
+Now you are ready to go on with [Part II](../part-02/README.md).
