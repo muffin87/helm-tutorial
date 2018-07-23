@@ -14,7 +14,6 @@ Table of contents:
 + [Part V: Update, Rollback and what's under the hood](part-05/README.md)
 + [Part VI: Setup our own chart repo](part-06/README.md)
 + [Part VII: Dependency management](part-07/README.md)
-+ [Part VIII: Multi-tenancy installation](part-08/README.md)
 + [References](#references)
 
 ## Introduction

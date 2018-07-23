@@ -1,8 +1,8 @@
 # Part II: Installing helm
 
 If you followed [Part I](../part-01/README.md) until now you should have a
-running minkube instance. In this part we will setup Helm. But first let's take
-at helms components.
+running Minkube instance. In this part we will setup Helm. But first let's take
+at Helms components.
 
 ## Helm in a Handbasket
 
@@ -13,7 +13,7 @@ Think of it like apt/yum/homebrew for Kubernetes.
 
 + Helm has two parts: a client `helm` and a server `tiller`.
 + Tiller runs inside of your Kubernetes cluster, and manages releases
-(installations) of your charts.
+(installations) of your Charts.
 + Helm runs on your laptop, CI/CD, or wherever you want it to run.
 + Charts are Helm packages that contain at least two things:
     * A description of the package (`Chart.yaml`)
@@ -48,13 +48,12 @@ need any additional things since `tiller` will be installed over `helm`.
 Just run: `helm init`. By default this will install `tiller` in the
 `kube-system` namespace. My personal recommendation is to use another Namespace
 though, since `kube-system` is very sensible in most cases. Good for us that
-the Helm Devs implemented a command line flag called `--tiller-namespace` to
+the Helm devs implemented a command line flag called `--tiller-namespace` to
 define a different Namespace.
 
 *Note: I would like to point out that you MUST always aim to secure your tiller
 in a production environment. For this tutorial we start off with a insecure
-setup. How to secure tiller on different levels will be touched in
-[Part VIII: Multi-tenancy installation](../part-08/README.md).*
+setup.*
 
 ```bash
 helm init --tiller-namespace tools --debug
@@ -148,11 +147,11 @@ manifest files contain our defined Namespace `namespace: tools`. We also see
 that the Deployment uses a tiller image `image: gcr.io/kubernetes-helm/tiller:v2.9.1`
 and we have a liveness probe which will check if our tiller is alive.
 
-The seconds manifest file (after the `---`) is a [service](https://kubernetes.io/docs/concepts/services-networking/service/) 
-object. A service object is an abstraction for our Pods. This follows the
+The seconds manifest file (after the `---`) is a [Service](https://kubernetes.io/docs/concepts/services-networking/service/) 
+object. A Service object is an abstraction for our Pods. This follows the
 famous [Pets vs Cattle analogy](http://cloudscaling.com/blog/cloud-computing/the-history-of-pets-vs-cattle/).
 It basically means, when we talk to our `tiller` we will always talk to the
-service object (which will redirect our request to the `tiller` Pod). We will
+Service object (which will redirect our request to the `tiller` Pod). We will
 never talk to the Pod directly.
 
 Let's check out if we see something inside our Kubernetes cluster:
@@ -215,9 +214,8 @@ time you launch a new shell._
 So are we now finished already? Almost ... there is this little thing called
 [Role-based access control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 in our way. With RBAC you can control who can do what. I have prepared a
-ClusterRoleBinding for our local dev environment. Please follow
-[Part VIII](../part-08/README.md) for a more secure, production ready, solution.
-Please apply / create the ClusterRoleBinding:
+ClusterRoleBinding for our local dev environment. Please apply / create the 
+ClusterRoleBinding:
 
 ```bash
 kubectl create -f part-02/templates/tiller-rbac.yml
@@ -227,7 +225,7 @@ kubectl create -f part-02/templates/tiller-rbac.yml
 clusterrolebinding.rbac.authorization.k8s.io/tiller created
 ```
 
-With this ClusterRoleBinding you give the default service account in the `tools`
+With this ClusterRoleBinding you give the default ServiceAccount in the `tools`
 Namespace admin rights on cluster level.
 
 Now we are ready to deploy our first `Chart`. We will cover this in

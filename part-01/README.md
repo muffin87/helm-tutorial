@@ -44,7 +44,7 @@ Kubectl is now configured to use the cluster.
 Loading cached images from config file.
 ```
 
-After starting minikube, you should check if you can interact with the Kubernetes API:
+After starting Minikube, you should check if you can interact with the Kubernetes API:
 
 ```
 kubectl get nodes

@@ -1,7 +1,7 @@
 # Part III: Deploy your first chart
 
-Now that we have everything in place, we can deploy our first chart. To start
-off simple, we will take an already packaged and tested chart. To get one of
+Now that we have everything in place, we can deploy our first Chart. To start
+off simple, we will take an already packaged and tested Chart. To get one of
 these `Charts` we will need to introduce the Helm repo management.
 
 ## Helm Repos
@@ -118,7 +118,7 @@ of the `Chart` we want to use. In this case `stable/dokuwiki`.
 The output will always contain some basic status information, like the name of
 the release, when the deployment happened, the Namespace where it was deployed
 to and the status of the release.
-After that helm will list all Kubernetes objects / resources which where created
+After that Helm will list all Kubernetes objects / resources which where created
 with this release.
 The last part contains additional information added by the author of the `Chart`
 to get you started with the application you just deployed.
@@ -139,8 +139,9 @@ tiller-deploy   ClusterIP      10.97.201.183    <none>        44134/TCP         
 wiki-dokuwiki   LoadBalancer   10.102.226.119   <pending>     80:30597/TCP,443:32240/TCP   9h        app=dokuwiki
 ```
 
-The external-ip is in a pending state. We can use a simple trick to access our wiki anyways - `kubectl port-forward`.
-For this to work, we need to know the name of the Pod we want to access:
+The external-ip is in a pending state. We can use a simple trick to access our 
+wiki anyways - `kubectl port-forward`. For this to work, we need to know the 
+name of the Pod we want to access:
 
 ```bash
 kubectl -n tools get pods -o wide
