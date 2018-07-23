@@ -1,0 +1,13 @@
+name: ghost
+home: https://ghost.org/de/
+version: 1.24.9
+description: Ghost is a free and open source blogging platform written in JavaScript and
+  distributed under the MIT License, designed to simplify the process of online
+  publishing for individual bloggers as well as online publications.
+sources:
+- https://hub.docker.com/_/ghost/
+- https://github.com/TryGhost/Ghost
+maintainers:
+- name: Fabian Müller
+  email: fabian.mueller@example.com
+icon: http://www.juliosblog.com/content/images/2016/12/Ghost_icon.png
