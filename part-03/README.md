@@ -18,7 +18,7 @@ packaged `Charts` a simple web server with an special index file is used (In
 With the `helm repo` command you can easily manage repositories. You can list,
 add, update and remove repo. By default Helm also setups some default repos.
 
-```bash
+```
 helm repo list
 NAME    URL
 stable  https://kubernetes-charts.storage.googleapis.com
@@ -38,7 +38,7 @@ The first demo application you will deploy is [Dokuwiki](https://www.dokuwiki.or
 Dokuwiki is a very simple open source wiki software. Before you can install it
 I recommend to update the `stable` repo with:
 
-```bash
+```
 helm repo update
 Hang tight while we grab the latest from your chart repositories...
 ...Skip local chart repository
@@ -48,7 +48,7 @@ Update Complete. ⎈ Happy Helming!⎈
 
 Let try the Helming:
 
-```bash
+```
 helm install --name wiki stable/dokuwiki
 NAME:   wiki
 LAST DEPLOYED: Wed Jul 18 21:43:30 2018
@@ -116,7 +116,7 @@ author added `type: LoadBalancer` in the service object for the wiki. Minikube
 don't support that feature out of the box. When you list the service you will
 see:
 
-```bash
+```
 kubectl -n tools get svc -o wide
 NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE       SELECTOR
 tiller-deploy   ClusterIP      10.97.201.183    <none>        44134/TCP                    1d        app=helm,name=tiller
@@ -138,7 +138,7 @@ To start the forwarding you can enter this following command. But be aware
 that this command don't finished until you cancel it. When you cancel the
 forwarding will stop working.
 
-```bash
+```
 kubectl -n tools port-forward  wiki-dokuwiki-6bb9fbbb67-m97r4 8080:80
 Forwarding from 127.0.0.1:8080 -> 80
 Forwarding from [::1]:8080 -> 80
@@ -194,7 +194,7 @@ helm ls
 
 That seems to be empty. Let's check with `kubectl`.
 
-```bash
+```
 kubectl get all --all-namespaces
 NAMESPACE     NAME                                        READY     STATUS    RESTARTS   AGE
 kube-system   pod/etcd-minikube                           1/1       Running   0          1h
@@ -231,7 +231,7 @@ tools         replicaset.apps/tiller-deploy-66998d5d74          1         1     
 So no wiki anymore? Yes it's gone! Okay fine let's redeploy it to the `tools`
 Namespace.
 
-```bash
+```
 helm install --name wiki --namespace tools stable/dokuwiki
 NAME:   wiki
 LAST DEPLOYED: Wed Jul 18 22:11:07 2018
