@@ -18,7 +18,7 @@ packaged `Charts` a simple web server with an special index file is used (In
 With the `helm repo` command you can easily manage repositories. You can list,
 add, update and remove repo. By default Helm also setups some default repos.
 
-```
+```bash
 helm repo list
 NAME    URL
 stable  https://kubernetes-charts.storage.googleapis.com
@@ -38,7 +38,7 @@ The first demo application you will deploy is [Dokuwiki](https://www.dokuwiki.or
 Dokuwiki is a very simple open source wiki software. Before you can install it
 I recommend to update the `stable` repo with:
 
-```
+```bash
 helm repo update
 Hang tight while we grab the latest from your chart repositories...
 ...Skip local chart repository
@@ -48,7 +48,7 @@ Update Complete. ⎈ Happy Helming!⎈
 
 Let try the Helming:
 
-```
+```bash
 helm install --name wiki stable/dokuwiki
 NAME:   wiki
 LAST DEPLOYED: Wed Jul 18 21:43:30 2018
@@ -116,7 +116,7 @@ author added `type: LoadBalancer` in the service object for the wiki. Minikube
 don't support that feature out of the box. When you list the service you will
 see:
 
-```
+```bash
 kubectl -n tools get svc -o wide
 NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE       SELECTOR
 tiller-deploy   ClusterIP      10.97.201.183    <none>        44134/TCP                    1d        app=helm,name=tiller
@@ -127,7 +127,7 @@ The external-ip is in a pending state. Anyways we can help us here with a simple
 trick by using something called `port-forward`. For this we need to know the name
 of the Pod we want to access:
 
-```
+```bash
 kubectl -n tools get pods -o wide
 NAME                             READY     STATUS    RESTARTS   AGE       IP           NODE
 tiller-deploy-66998d5d74-9d2gc   1/1       Running   1          1d        172.17.0.4   minikube
@@ -138,7 +138,7 @@ To start the forwarding you can enter this following command. But be aware
 that this command don't finished until you cancel it. When you cancel the
 forwarding will stop working.
 
-```
+```bash
 kubectl -n tools port-forward  wiki-dokuwiki-6bb9fbbb67-m97r4 8080:80
 Forwarding from 127.0.0.1:8080 -> 80
 Forwarding from [::1]:8080 -> 80
@@ -161,7 +161,7 @@ Now that you installed a `Chart` we should take a look how you can manage your
 releases. A very important feature is how you can find and see what releases
 are currently deployed. You can do that by executing:
 
-```
+```bash
 helm list
 NAME    REVISION        UPDATED                         STATUS          CHART           NAMESPACE
 wiki    1               Wed Jul 18 21:43:30 2018        DEPLOYED        dokuwiki-2.0.3  default
@@ -180,7 +180,7 @@ To delete a release you need to now the name of the release. In our case we know
 the name it's `wiki` and you also now how to look up all release. So that
 should be a problem anymore. So let's delete the release with:
 
-```
+```bash
 helm del wiki --purge
 release "wiki" deleted
 ```
@@ -188,13 +188,13 @@ release "wiki" deleted
 With the `--purge` option you make sure that really ALL resources of that release
 should be deleted. Did that work? Let's do the `list` operation again:
 
-```
+```bash
 helm ls
 ```
 
 That seems to be empty. Let's check with `kubectl`.
 
-```
+```bash
 kubectl get all --all-namespaces
 NAMESPACE     NAME                                        READY     STATUS    RESTARTS   AGE
 kube-system   pod/etcd-minikube                           1/1       Running   0          1h
@@ -231,7 +231,7 @@ tools         replicaset.apps/tiller-deploy-66998d5d74          1         1     
 So no wiki anymore? Yes it's gone! Okay fine let's redeploy it to the `tools`
 Namespace.
 
-```
+```bash
 helm install --name wiki --namespace tools stable/dokuwiki
 NAME:   wiki
 LAST DEPLOYED: Wed Jul 18 22:11:07 2018
@@ -283,6 +283,13 @@ The command stays pretty much the same except that you now set the Namespace
 with the `--namespace` flag. If you like you can perform the same actions we did
 when we first deployed the service (check the status of the Pods and do the 
 port forwarding).
+
+When you are finished exploring the wiki you should delete it again:
+
+```bash
+helm del wiki --purge
+release "wiki" deleted
+```
 
 Now it's time to move on. In [Part IV](../part-04/README.md) you will create
 a `Chart` from scratch. Don't worry you will repeat the management of `Charts`.
