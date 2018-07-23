@@ -220,7 +220,7 @@ you face problems feel free to take a look at them._
 Before we can deploy our chart with dependencies we need to first fetch them.
 Helm also offers us a command for this which is called `dependency update`.
 
-```bash
+```
 helm dependency update ghost
 Hang tight while we grab the latest from your chart repositories...
 ...Unable to get an update from the "local" chart repository (http://127.0.0.1:8879/charts):
@@ -236,7 +236,7 @@ Helm will try to find the `requirements.yaml` and resolves all listed
 dependencies by downloading the corresponding charts. To verify what Helm
 really did we can take a look into our chart directory:
 
-```bash
+```
 ls -al ghost/
 total 32
 drwxr-xr-x  9 mll0005f  631410114   288 22 Jul 19:12 .
@@ -265,7 +265,7 @@ Helm tells us what have been downloaded. We also see that we will get an sha256
 hash which can be used to verify if we downloaded the right package. In addition
 we will find other new thing in our chart. A folder called `charts`:
 
-```bash
+```
 ls -al ghost/charts
 total 24
 drwxr-xr-x  3 mll0005f  631410114    96 22 Jul 19:12 .
@@ -276,7 +276,7 @@ drwxr-xr-x  9 mll0005f  631410114   288 22 Jul 19:12 ..
 Helm will place all charts there which are listed as dependency. Now we can
 try to deploy our blog again. The command stays the same:
 
-```bash
+```
 helm install --name blog --namespace=tools ./ghost
 NAME:   blog
 LAST DEPLOYED: Sun Jul 22 20:22:28 2018
@@ -322,7 +322,7 @@ When you take a look a the deployed resources you will see that the MySql DB
 really was deployed along with Ghost. Let's see if Ghost can access the database
 by viewing the logs:
 
-```bash
+```
 kubectl -n tools logs blog-6fd6cd54b9-czsb9 -f
 [2018-07-22 17:27:39] INFO Creating table: posts
 [2018-07-22 17:27:39] INFO Creating table: users
