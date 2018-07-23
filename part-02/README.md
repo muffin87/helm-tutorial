@@ -1,8 +1,8 @@
 # Part II: Installing helm
 
-When you followed [Part I](../part-01/README.md) you should have a running dev
-environment. In this part we will setup Helm. But first let's take a look
-which components Helm has.
+If you followed [Part I](../part-01/README.md) until now you should have a
+running minkube instance. In this part we will setup Helm. But first let's take
+at helms components.
 
 ## Helm in a Handbasket
 
@@ -23,10 +23,10 @@ Debian or RedHat packages).
 
 ## Installation
 
-You first need the client `helm`. Since Helm is written in GoLang you simply need
-to download the static compiled binaries and place them somewhere on your disk
-and be sure that they have the rights that you can execute them. In addition
-you can also find a Helm package for Homebrew and Chocolatey.
+You first need the client `helm`. Since Helm is written in Go you simply need
+to download the staticly compiled binary and place it somewhere on your disk.
+Make sure that you can execute it.
+There are also Helm packages for Homebrew and Chocolatey.
 
 Homebrew:
 
@@ -45,23 +45,23 @@ For other Linux / Unix distributions please download the binaries on the
 
 Next step would be to install / setup the server component `tiller`. You don't
 need any additional things since `tiller` will be installed over `helm`.
-You just would run: `helm init`. This would install the `tiller` in the 
-`kube-system` by default. My personal recommendation is to use another Namespace
-for Helm since `kube-system` is in most cases very sensible. Good for us that
-the Helm Dev implemented a command line flag `--tiller-namespace` to define
-a special Namespace.
+Just run: `helm init`. By default this will install `tiller` in the
+`kube-system` namespace. My personal recommendation is to use another Namespace
+though, since `kube-system` is very sensible in most cases. Good for us that
+the Helm Devs implemented a command line flag called `--tiller-namespace` to
+define a different Namespace.
 
 *Note: I would like to point out that you MUST always aim to secure your tiller
 in a production environment. For this tutorial we start off with a insecure
-version. How to secure the tiller on different levels and will be touched in 
+setup. How to secure tiller on different levels will be touched in
 [Part VIII: Multi-tenancy installation](../part-08/README.md).*
 
 ```bash
 helm init --tiller-namespace tools --debug
 ```
 
-This will setup the `tiller` in the `tools` Namespace. I have also added the
-`--debug` command that we have a little more more output what's going one.
+This will setup `tiller` in the `tools` Namespace. I have also added the
+`--debug` command, so we can see a little bit better what's going on:
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -142,23 +142,26 @@ For more information on securing your installation see: https://docs.helm.sh/usi
 Happy Helming!
 ```
 
-What Helm does is simply apply an [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+What Helm does, is simply applying a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 which is the simplest high level API object in Kubernetes. We see that the
-manifest files contains your wanted Namespace `namespace: tools`. We also see
+manifest files contain our defined Namespace `namespace: tools`. We also see
 that the Deployment uses a tiller image `image: gcr.io/kubernetes-helm/tiller:v2.9.1`
 and we have a liveness probe which will check if our tiller is alive.
 
 The seconds manifest file (after the `---`) is a [service](https://kubernetes.io/docs/concepts/services-networking/service/) 
-object. A service object is an abstraction for your Pods. This follows the
+object. A service object is an abstraction for our Pods. This follows the
 famous [Pets vs Cattle analogy](http://cloudscaling.com/blog/cloud-computing/the-history-of-pets-vs-cattle/).
-This basically means when we talk to our `tiller` we will always talk to the
-service object (which will redirect our request to the ``tiller` Pod). We would
+It basically means, when we talk to our `tiller` we will always talk to the
+service object (which will redirect our request to the `tiller` Pod). We will
 never talk to the Pod directly.
 
 Let's check out if we see something inside our Kubernetes cluster:
 
 ```
 kubectl -n tools get all -l name=tiller -o wide
+```
+
+```
 NAME                                 READY     STATUS    RESTARTS   AGE       IP           NODE
 pod/tiller-deploy-66998d5d74-9d2gc   1/1       Running   0          23m       172.17.0.4   minikube
 
@@ -172,47 +175,60 @@ NAME                                       DESIRED   CURRENT   READY     AGE    
 replicaset.apps/tiller-deploy-66998d5d74   1         1         1         23m       tiller       gcr.io/kubernetes-helm/tiller:v2.9.1   app=helm,name=tiller,pod-template-hash=2255481830
 ```
 
-There is the Deployment as well as the Service. The Replicaset and the Pod belongs
+There is the Deployment as well as the Service. The Replicaset and the Pod belong
 to the Deployment.
 
-So now our `tiller` is running but how do you communicate with it? When you don't
-use the default Namespace we need to tell your client where to find your `tiller`.
+So now our `tiller` is running, but how do we communicate with it? When we don't
+use the default Namespace we need to tell our helm-client where to find our
+`tiller`.
 
 ```
 helm version
+```
+
+```
 Client: &version.Version{SemVer:"v2.9.1", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
 ```
 
 You will notice that the command hangs. So let's try to define the `tiller` 
 Namespace.
 
-````
+```
 export TILLER_NAMESPACE=tools
+```
+
+```
 helm version
+```
+
+```
 Client: &version.Version{SemVer:"v2.9.1", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
 Server: &version.Version{SemVer:"v2.9.1", GitCommit:"20adb27c7c5868466912eebdf6664e7390ebe710", GitTreeState:"clean"}
 ````
 
 Now we have an answer from our server component. 
 
-_Note: I would recommend to set this the `TILLER_NAMESPACE` env var (in your
-`.bashrc`, `.zshrc` and so on) so that you don't have to set this manually every
+_Note: I would recommend to set the `TILLER_NAMESPACE` env var in your
+`.bashrc` or `.zshrc`, so you don't have to set this manually every
 time you launch a new shell._
 
 So are we now finished already? Almost ... there is this little thing called
 [Role-based access control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
-in our way. With RBAC you control who can do what. I have prepared a
-ClusterRoleBinding for our local dev environment approach. Please follow 
-[Part VIII](../part-08/README.md) for a more secure production ready solution.
+in our way. With RBAC you can control who can do what. I have prepared a
+ClusterRoleBinding for our local dev environment. Please follow
+[Part VIII](../part-08/README.md) for a more secure, production ready, solution.
 Please apply / create the ClusterRoleBinding:
 
 ```bash
 kubectl create -f part-02/templates/tiller-rbac.yml
+```
+
+```
 clusterrolebinding.rbac.authorization.k8s.io/tiller created
 ```
 
 With this ClusterRoleBinding you give the default service account in the `tools`
 Namespace admin rights on cluster level.
 
-Now you are ready to deploy our first `Chart`. We will cover this in
+Now we are ready to deploy our first `Chart`. We will cover this in
 [Part III](../part-03/README.md).

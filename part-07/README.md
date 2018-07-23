@@ -1,33 +1,34 @@
 # Part VII: Dependency management
 
 In this part we will take a look at dependency management. With Helm you can
-define dependency which should be deploy together with your application. This
-can be really helpful when you have a bunch of applications. Instead of creating
-a very big chart which contains every application you can try to split them up 
-and create multiple charts.
+define dependencies which should be deployed together with your application. This
+can be really helpful, when you have a bunch of applications which need to work
+together. Instead of creating a very big chart, which contains every application,
+you can try to split them up and create multiple charts.
 
 _Note: It's very hard to give you a clear threshold when to split up your charts.
-An indicator could be when the `values.yaml` gets very complex and or long._
+An indicator could be when the `values.yaml` gets very complex and too long._
 
 ## Requirements
 
-When you define dependencies you need to create a file called `requirements.yaml`
+When you define dependencies you need to create a file called `requirements.yaml`.
 We will go through the process of setting up such a file, of course, with an
-example: Let's take back our Ghost application. In the first parts we run our
-blog software with a SQLLite database. Image you now face the problem that
-the traffic on your running blog instance is very high and the latency increases.
-After taking a look in your monitoring system you notice that the database is the
-bottleneck (high IO on the SQLLite partition). You now have a few options like
-using faster storage or try to add a cache. For our example we will try to switch
-the database from SQLLite to MySQL. With MySQL you can create Master Slave
-replications which scales much better. So we need to modify our Ghost chart.
-First we will create a `requirements.yaml` file.
+example: Let's take a look back at our Ghost application. In the first part we
+ran our blog software with a SQLite database. Imagine xou are now facing the
+problem that the traffic on your running blog instance is very high and the
+latency increases. After taking a look in your monitoring system, you notice
+that the database is the bottleneck (high IO on the SQLite partition).
+You now have a few options like using faster storage or try to add a cache.
+For our example we will try to switch the database from SQLite to MySQL. With
+MySQL you can use Master Slave replications which scale much better.
+So we need to modify our Ghost chart. First we will create a
+`requirements.yaml` file:
 
 ```bash
 touch requirements.yaml ghost/
 ```
 
-We will add the following to that file:
+And add the following lines to that file:
 
 ```yaml
 dependencies:
@@ -42,8 +43,8 @@ version and the repository where to find it. For MySQL you can look up this info
 
 To match the new requirements we will need to change some things. First we will
 convert our Statefulset into a Deployment. We removed our `volume` section as 
-well as the `VolumeClaimTempalte`. This is because MySQL is a separate 
-container. That sad your Ghost container do not need to handle state anymore.
+well as the `VolumeClaimTemplate`. This is because MySQL is a separate
+container. So our Ghost container does not need to handle state anymore.
 
 ```
 mv ghost/templates/ghost_statefulset.yaml ghost/templates/ghost_deployment.yaml
@@ -132,7 +133,7 @@ spec:
 ```
 
 We changed the `kind` from `Statefulset` to `Deployment` and removed the 
-`serviceName`. Also we needed a bunch of environment variables to configure
+`serviceName`. We also added a bunch of environment variables to configure
 the database connection for Ghost (see `env` section). All available env vars 
 are listed [here](https://docs.ghost.org/docs/config#section-running-ghost-with-config-env-variables).
 
@@ -203,9 +204,9 @@ mysql:
 
 We need to fill the environment vars mentioned in the Deployment. The
 interesting part is located at the end of the file. There you see a new section
-called `mysql`. To actually set the user, password and database we need to
-override these values in the mysql chart. Remember we included the mysql chart
-as dependency under the name `mysql`. To find the right variables to override
+called `mysql`. This is used to actually set the user, password and database
+in the mysql chart. Remember we included the mysql chart
+as a dependency under the name `mysql`. To find the right variables to override
 I recommend to take a look at the readme page of the [stable repo section](https://github.com/helm/charts/tree/master/stable/mysql#configuration).
 This step can be really confusing since we override the values of another chart
 in our Ghost chart.
@@ -216,11 +217,14 @@ subchart._
 _Note: I included all templates for this section in `part-07/templates`. When
 you face problems feel free to take a look at them._
 
-Before we can deploy our chart with dependencies we need to first fetch them.
-Helm also offers us a command for this which is called `dependency update`.
+Before we can deploy our chart with dependencies we need to fetch them.
+Helm also offers a command for this which is called `dependency update`.
 
 ```
 helm dependency update ghost
+```
+
+```
 Hang tight while we grab the latest from your chart repositories...
 ...Unable to get an update from the "local" chart repository (http://127.0.0.1:8879/charts):
         Get http://127.0.0.1:8879/charts/index.yaml: dial tcp 127.0.0.1:8879: connect: connection refused
@@ -233,7 +237,7 @@ Deleting outdated charts
 
 Helm will try to find the `requirements.yaml` and resolves all listed
 dependencies by downloading the corresponding charts. To verify what Helm
-really did we can take a look into our chart directory:
+really did, we can take a look into our charts directory:
 
 ```
 ls -al ghost/
@@ -249,7 +253,7 @@ drwxr-xr-x  7 mll0005f  631410114   224 22 Jul 19:08 templates
 -rw-r--r--  1 mll0005f  631410114  2628 22 Jul 19:09 values.yaml
 ```
 
-We find a new file called `requirements.lock` which contains the following:
+We also find a new file called `requirements.lock` which contains the following data:
 
 ```yaml
 dependencies:
@@ -260,23 +264,30 @@ digest: sha256:8314e90806de6a8f2b6937679fdca7f13f172926d60e3c6838b0dd1f2c431c68
 generated: 2018-07-22T19:12:20.36788332+02:00
 ```
 
-Helm tells us what have been downloaded. We also see that we will get an sha256
-hash which can be used to verify if we downloaded the right package. In addition
-we will find other new thing in our chart. A folder called `charts`:
+With this lock file, Helm keeps track of pur dependencies.
+Besides some metadata it also contains a sha256 hash which can be used to
+verify the integrity of the downloaded package.
+there is also another new thing in our chart folder. A folder called `charts`:
 
 ```
 ls -al ghost/charts
+```
+
+```
 total 24
 drwxr-xr-x  3 mll0005f  631410114    96 22 Jul 19:12 .
 drwxr-xr-x  9 mll0005f  631410114   288 22 Jul 19:12 ..
 -rw-r--r--  1 mll0005f  631410114  8278 22 Jul 19:12 mysql-0.8.2.tgz
 ```
 
-Helm will place all charts there which are listed as dependency. Now we can
+Helm will there place all charts which are listed as a dependency. Now we can
 try to deploy our blog again. The command stays the same:
 
 ```
 helm install --name blog --namespace=tools ./ghost
+```
+
+```
 NAME:   blog
 LAST DEPLOYED: Sun Jul 22 20:22:28 2018
 NAMESPACE: tools
@@ -318,7 +329,7 @@ blog-mysql-test  1     0s
 ```
 
 When you take a look a the deployed resources you will see that the MySql DB
-really was deployed along with Ghost. Let's see if Ghost can access the database
+was deployed along with Ghost. Let's see if Ghost can access the database
 by viewing the logs:
 
 ```
@@ -363,11 +374,14 @@ kubectl -n tools logs blog-6fd6cd54b9-czsb9 -f
 [2018-07-22 17:29:01] INFO Ghost boot 47.103s
 ```
 
-That looks very good. If you want, you can verify if you can access the blog.
-To complete this part of the tutorial we will delete the blog again.
+That looks very good. If you want, you can verify it by accessing the blog.
+To complete this part of the tutorial, we will delete the blog again.
 
 ```
 helm del blog --purge
+```
+
+```
 release "blog" deleted
 ```
 

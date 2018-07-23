@@ -1,10 +1,10 @@
 # Kubernetes Helm Tutorial
 
 In this guide I will walk you through the basics of Kubernetes Helm. This
-includes different kind of installation, the use of public charts and of course,
-creating and managing your own charts.
+includes different kinds of installations, the use of public charts and of
+course, creating and managing your own charts.
 
-Table of content:
+Table of contents:
 
 + [Introduction](#introduction)
 + [Part I: Setting up a local dev environment](part-01/README.md)
@@ -19,15 +19,15 @@ Table of content:
 
 ## Introduction
 
-Let's start off by shortly sum up what Helm is good for and why you should use
+Let's start off by shortly summing up what Helm is good for and why you should use
 it. Helm makes your life easier when it comes to managing Kubernetes resources.
-It helps you group your resources together to so called `Chart`s and assign them
-a [semantic version](https://semver.org/). In that way you can package and
-release you resources along with your application. To get more flexibility into
-your resources, Helm has a very strong templating framework which is based on 
+It helps you by grouping your resources in so called `Charts` and assigning them
+[semantic versions](https://semver.org/). In that way, you can package and
+release you resources along with your application. To make this more flexible,
+Helm uses a very strong templating framework which is based on
 [Go-Template](https://golang.org/pkg/text/template/).
 
-Enough talking let's make our hands dirty and start with setting up a local
+Enough talking. Let's make our hands dirty and start with setting up a local
 dev environment.
 
 ## References

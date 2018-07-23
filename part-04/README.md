@@ -15,14 +15,14 @@ myAwesomeApp/
     README.md               # OPTIONAL: A human-readable README file.
     requirements.yaml       # OPTIONAL: A YAML file listing dependencies for the chart.
     vaules.yaml             # The default configuration values for this chart.
-    charts/                 # A directory containing any charts upon which this chart depends.
+    charts/                 # OPTIONAL: A directory containing any charts upon which this chart depends.
     templates/              # A directory of templates that, when combined with values, will generate valid Kubernetes manifest files.
-    tempaltes/NOTES.txt     # OPTIONAL: A plain text file containing short usage notes
+    templates/NOTES.txt     # OPTIONAL: A plain text file containing short usage notes
 ```
 
 ## Building a Chart
 
-For demo cases we will package an application called [Ghost](https://github.com/tryghost).
+For our demo, we will package an application called [Ghost](https://github.com/tryghost).
 
 ```
 Ghost is a free and open source blogging platform written in JavaScript and 
@@ -31,15 +31,15 @@ publishing for individual bloggers as well as online publications.
 ```
 
 Ghost needs a place to persist data. Things like pictures and other binary data
-will be place on a filesystem and some other information needs to be stored
-in a database. Since we want to start simple we will use SQLLite. We also will
-not build the Docker image from scratch. We will use the one which is available
+will be placed on the filesystem. Other data needs to be stored
+in a database. Since we want to start simple, we will use SQLite. We will also
+not build the Docker image from scratch. Instead we will use the one available
 on the [Docker Hub](https://hub.docker.com/_/ghost/).
 
-_Note: I always recommend that you build your own images when you run in production.
+_Note: I always recommend to build your own images when you run them in production.
 You never know exactly what's inside an image! See [Backdoor Software](https://www.bleepingcomputer.com/news/security/17-backdoored-docker-images-removed-from-docker-hub/)_
 
-You first create the folder structure (somewhere on your local filesystem).
+First let's create the folder structure (somewhere on your local filesystem).
 
 ```bash
 mkdir -p ghost/templates
@@ -47,8 +47,8 @@ cd ghost
 touch Chart.yaml README.md values.yaml templates/NOTES.txt
 ```
 
-Next you need to open this dir with an editor of your choice. We start editing 
-the `Chart.yaml` file:
+Next you need to open this dir with an editor of your choice.
+We start with editing the `Chart.yaml` file:
 
 ```yaml
 name: ghost
@@ -67,29 +67,29 @@ icon: http://www.juliosblog.com/content/images/2016/12/Ghost_icon.png
 ```
 
 In this file we will collect the basic metadata for the chart. Every chart needs
-a `name` a `version` and a `description`. The `home` key is option but useful
-to point to a official website of the application. In addition you can define
-one or more link to `sources`. It can also very helpful to define maintainers
-for a chart, so you can contact that person in case of questions for
-improvements. The `icon` is only important when you publish the chart to a web
-frontend which let you browse charts.
+a `name` a `version` and a `description`. The `home` key is optional but useful
+to point to the official website of an application. In addition to that, you can
+define links to `sources`. It can also very helpful to define maintainers
+of a chart, so you can contact that person in case of questions or
+improvements of a specific chart. The `icon` is only important when you publish
+the chart to a web frontend which lets you browse charts.
 
-We will skip the `README.md` and the `values.yaml` for now. We will first jump
+We will skip the `README.md` and the `values.yaml` for now. First let's jump
 into the `templates` folder and create the Kubernetes resources we need. At this
 point some basic Kubernetes knowledge kicks in. We know that Ghost is no
 stateless application (we need to store things). Therefore we choose a 
 [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
-as a base and not a Deployment. The next question we need to answer is should
-other services or users access Ghost. Since it's a Blog software I think we
-can answer with YES. Users should be able to access Ghost. So we need at least
-a Service object and in most cases also an Ingress object.
+as a base and not a Deployment. The next question we need to answer is, should
+other services or users access Ghost. Since it's a blog software, I think we
+can answer this with YES. Users should be able to access Ghost. So we need at
+least a Service object and in most cases also an Ingress object.
 
 ````bash
 cd templates
 touch ghost_statefulset.yaml ghost_service.yaml ghost_ingress.yaml
 ````
 
-Let first setup the ingress:
+Let's first setup the ingress:
 
 ```yaml
 apiVersion: extensions/v1beta1
@@ -108,10 +108,10 @@ spec:
           servicePort: {{ .Values.ghost.statefulset.ports.port }}
 ```
 
-That looks like a normal Kubernetes manifest file right? The only difference you
-will notice is that we use the GoLang templating to make the manifest file
-dynamic. What does that mean? Well we use variables which will be replaced during 
-rending time. 
+This looks like a normal Kubernetes manifest file right? The only difference you
+will notice is that we use Go templating to make the manifest file
+dynamic. What does that mean exactly? The variables we define here, will be
+replaced dynamically when the chart is rendered.
 
 ```yaml
 name: {{ .Release.Name }}
@@ -124,12 +124,12 @@ name: {{ .Release.Name }}
 name: blog
 ```
 
-`Release` is a so called build-in object. For a list of build-in object please
+`Release` is another, so called, built-in object. For a list of built-in object please
 take a look at [Build-In objects](https://docs.helm.sh/chart_template_guide/#built-in-objects).
 
 The `Values` object is referencing the `values.yaml` file in the top level folder
-of the chart. We will take a look at it later. At this point you only need to
-know that every variable starting with `Values` is taken from the `values.yaml`.
+of the chart. We will take a look at this later. At this point you only need to
+know that every variable starting with `Values` is taken from `values.yaml`.
 
 Now let's setup the Service object:
 
@@ -160,26 +160,28 @@ spec:
 
 ```
 
-In the Service object you will also find the `Release` object and also some 
+In the Service object you will find the `Release` object and as well as some
 vars starting with `Values`. There is a new object, the `Chart` object, that is
-referencing the `Chart.yaml` file. Also we see
+referencing the `Chart.yaml` file. There is another new part, which looks like
+this:
 
 ```yaml
 app: {{ template "ghost.fullname" . }}
 ```
 
-With the `template` function you can dynamically include complex blocks. It's 
-like a include function. This function can be helpful, when you need a block 
-multiple times. This also helps you clean up the yaml files and make it easier 
+With the `template` function, you can dynamically include complex blocks. It's
+like an include function. This function can be helpful, when you need a block
+multiple times. It also helps you clean up the yaml files and make them easier
 to read through. In our case we will call the template with the name 
 `ghost.fullname`. Helm will try to lookup a block with that name in 
-the `_helpers.tpl` file located in the `templates` dir. We will create that now:
+the `_helpers.tpl` file located in the `templates` dir. Let's create this file
+now:
 
 ```bash
 touch templates/_helpers.tpl
 ```
 
-And we will insert this template:
+And add the following template:
 
 ```gotemplate
 {{/*
@@ -201,12 +203,14 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 ```
 
-As you see we use the keyword `define` with the name of the template. and use
-`end` to tell the interpreter where it ends. In this case we make sure that the
+As you can see, we use the keyword `define` with the name of the template and use
+`end` to tell the interpreter where it ends. Notice how the template name is
+prefixed with the name of our chart, to make sure the template is not
+accidentialy overwritten. This template makes sure that the
 app name will not reach more than 63 chars. For more information about these
-named template please see [here](https://docs.helm.sh/chart_template_guide/#named-templates).
+named templates please check [here](https://docs.helm.sh/chart_template_guide/#named-templates).
 
-And the last object, the Statefulset:
+The last object we need is a StatefulSet:
 
 ```yaml
 apiVersion: apps/v1
@@ -349,26 +353,28 @@ ghost:
 
 ```
 
-Here you will find all variables used in this chart. The iteration or navigation
-through the file will follow the normal YAML rules. When you want to access the
-name of the port for example `name: web` you would reference it like:
+Here you will find all variables used in this chart.
+Accessing the varibales follows the normal YAML rules. When you want to use
+for example the name of the port (`name: web`) you would reference it like this:
 
 ```gotemplate
 {{ .Values.ghost.statefulset.ports.name }}
 ```
 
-_Note: I included the ghost chart under `part-04/templates/ghost`.If you face 
-problems with creation the chart you can also take a look there to find
-out what went wrong._
+_Note: You can find the working chart in `part-04/templates/ghost`. If you face
+problems with creating the chart, you can also take a look there and find
+out what went wrong with your solution._
 
-Now we can try to deploy our chart. I recommend that you use the `--debug` flag.
-With that flag Helm will print the rendered manifest files to stdout. In addition
-you can use `--dry-run` to just render the template and not deploy it. This can
-be very helpful when you just want to check if the templates are correctly
-renders. 
+Now let's deploy our chart. I recommend using the `--debug` flag to enable
+verbose output. In addition to that you can initially use `--dry-run` to render
+the template to stdout instead of deploying it. This can be very helpful if
+you want to check if the templates render correctly.
 
 ```
 helm install --name blog --namespace=tools ./ghost --debug
+```
+
+```
 [debug] Created tunnel using local port: '51496'
 
 [debug] SERVER: "127.0.0.1:51496"
@@ -563,26 +569,28 @@ NAME    READY  STATUS             RESTARTS  AGE
 blog-0  0/1    ContainerCreating  0         0s
 ```
 
-So you see in the output above we get all rendered manifest files. When you face
-an error, there are two potential sources:
+As you can see in the output above, we get all manifest files rendered correctly.
+When you face an error, there are often only two potential sources:
 
-1) You template got a problem. For example you reference a var which Helm don't
-find in the `values.yaml`. Or you got a syntax error inside your templates. That
-kind of error messages will come from Helm.
-2) Your manifest file is not valid because you have forgot a field in the manifest
-which is required in order to deploy it. In this case the error message
+1) You template is wrong. For example, you reference a var which is not in
+the `values.yaml`. Or you got a syntax error inside your templates. These
+kind of error messages will come directly from Helm.
+2) Your manifest file is not valid because you have forgotten a field in the
+manifest which is required in order to deploy it. In this case the error message
 will come from the Kubernetes API.
 
-In some cases it's very hard to find the error and also get a feeling who send
-the error message. My recommendation is to take a closer look at the debug output.
-It's also worth to write the debug output to a file and try to deploy the single
-resources with `kubectl`.
+In some cases it's very hard to understand the error and get a feeling which
+component sent the error message. My recommendation is to take a closer look at
+the debug output. It's also worth a try to write the debug output to a file and
+try to deploy the different resources with `kubectl`.
 
-Now let's see if our blog is running by taking a look at the deployed resources
-again.
+Now let's see if our blog is running by taking a look at the deployed resources:
+
+```bash
+kubectl -n tools get all -l "app=blog-ghost"
+```
 
 ```
-kubectl -n tools get all -l "app=blog-ghost"
 NAME    REVISION        UPDATED                         STATUS          CHART           NAMESPACE
 blog    1               Sat Jul 21 09:18:33 2018        DEPLOYED        ghost-1.24.8    tools
 
@@ -597,12 +605,14 @@ statefulset.apps/blog   1         1         26m
 ```
 
 That looks very good. Now let's try to access the blog by port forwarding
-the web port.
+the web port:
 
 ```bash
 kubectl -n tools port-forward blog-0 2368:2368
 ```
-You should now be able to see the blog when you open a browser and
+
+You should now be able to see the blog when you open yout browser and
 enter `localhost:2368`.
 
-In [Part V](../part-05/README.md) we will take a look how to manipulate releases.
+In [Part V](../part-05/README.md) we will take a look at how to manipulate
+releases.
