@@ -59,7 +59,7 @@ Update Complete. ⎈ Happy Helming!⎈
 Let try the Helming:
 
 ```
-helm install --name wiki stable/dokuwiki
+helm install --namespace tools --name wiki stable/dokuwiki
 ```
 
 ```
