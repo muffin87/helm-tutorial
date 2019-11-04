@@ -74,16 +74,16 @@ version of the packaged software. The `home` key is optional but useful
 to point to the official website of an application. In addition to that, you can
 define links to `sources`. It can also very helpful to define maintainers
 of a chart, so you can contact that person in case of questions or
-improvements of a specific chart. The `icon` is only important when you publish
+improvements to a specific chart. The `icon` is only important when you publish
 the chart to a web frontend which lets you browse charts.
 
 We will skip the `README.md` and the `values.yaml` for now. First let's jump
 into the `templates` folder and create the Kubernetes resources we need. At this
-point some basic Kubernetes knowledge kicks in. We know that Ghost is no
+point some basic Kubernetes knowledge is of help. We know that Ghost is no
 stateless application (we need to store things). Therefore we choose a 
 [StatefulSet](https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
-as a base and not a Deployment. The next question we need to answer is, should
-other services or users access Ghost. Since it's a blog software, I think we
+as a base and not a Deployment. The next question we need to answer is: should
+other services or users access Ghost? Since it's a blog software, I think we
 can answer this with YES. Users should be able to access Ghost. So we need at
 least a Service object and in most cases also an Ingress object.
 
@@ -174,7 +174,7 @@ app: {{ template "ghost.fullname" . }}
 ```
 
 With the `template` function, you can dynamically include complex blocks. It's
-like an include function. This function can be helpful, when you need a block
+like an include function. This function can be helpful when you need a block
 multiple times. It also helps you clean up the yaml files and make them easier
 to read through. In our case we will call the template with the name 
 `ghost.fullname`. Helm will try to lookup a block with that name in 

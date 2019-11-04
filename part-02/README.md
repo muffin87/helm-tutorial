@@ -47,7 +47,7 @@ Next step would be to install / setup the server component `tiller`. You don't
 need any additional things since `tiller` will be installed over `helm`.
 Just run: `helm init`. By default this will install `tiller` in the
 `kube-system` namespace. My personal recommendation is to use another Namespace
-though, since `kube-system` is very sensible in most cases. Good for us that
+though, since `kube-system` is very volatile in most cases. Good for us that
 the Helm devs implemented a command line flag called `--tiller-namespace` to
 define a different Namespace.
 
@@ -141,13 +141,13 @@ For more information on securing your installation see: https://docs.helm.sh/usi
 Happy Helming!
 ```
 
-What Helm does, is simply applying a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
+What Helm does is simply applying a [Deployment](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/)
 which is the simplest high level API object in Kubernetes. We see that the
 manifest files contain our defined Namespace `namespace: tools`. We also see
 that the Deployment uses a tiller image `image: gcr.io/kubernetes-helm/tiller:v2.9.1`
 and we have a liveness probe which will check if our tiller is alive.
 
-The seconds manifest file (after the `---`) is a [Service](https://kubernetes.io/docs/concepts/services-networking/service/) 
+The second manifest file (after the `---`) is a [Service](https://kubernetes.io/docs/concepts/services-networking/service/) 
 object. A Service object is an abstraction for our Pods. This follows the
 famous [Pets vs Cattle analogy](http://cloudscaling.com/blog/cloud-computing/the-history-of-pets-vs-cattle/).
 It basically means, when we talk to our `tiller` we will always talk to the
@@ -211,7 +211,7 @@ _Note: I would recommend to set the `TILLER_NAMESPACE` env var in your
 `.bashrc` or `.zshrc`, so you don't have to set this manually every
 time you launch a new shell._
 
-So are we now finished already? Almost ... there is this little thing called
+So are we finally done? Almost ... there is this little thing called
 [Role-based access control (RBAC)](https://kubernetes.io/docs/reference/access-authn-authz/rbac/)
 in our way. With RBAC you can control who can do what. I have prepared a
 ClusterRoleBinding for our local dev environment. Please apply / create the 

@@ -9,7 +9,7 @@ need to be deployed in one go. We will cover dependency management in
 ## Chart repo
 
 So what's needed to host a Chart repo? It's less than you think. You basically
-need a web server which serves an `index.yaml` and you need some packaged Charts.
+need a web server which serves an `index.yaml` and some packaged Charts.
 Since we use HTTP(S) to communicate with a web server, you get your charts by
 executing a GET request to the right URL. 
 
@@ -36,9 +36,9 @@ detailed info how to set this up._
 
 If we want to download the mysql Chart and our base URL is
 http://my-chart-repo.example.com/charts, we would do a GET on
-http://my-chart-repo.example.com/charts/mysql-1.0.0.tgz. Simple isn't it?
+http://my-chart-repo.example.com/charts/mysql-1.0.0.tgz. Simple, isn't it?
 
-You now wonder what the `index.yaml` is for? Well, for some operations you need
+You wonder what the `index.yaml` is for? Well, for some operations you need
 some metadata of the Charts, since the only thing we have on the web server side
 are the packaged and compressed Charts and those only have the name and the Chart
 version on them. An operation where we need the `index.yaml` would for example
@@ -70,7 +70,7 @@ Charts reside.
 helm repo index
 ```
 
-You see, this is no rocket science. You have many options to host / build your
+As you can see, this is no rocket science. You have many options to host / build your
 repo:
 
 * Host a static web server which is updated with CI / CD.
@@ -92,10 +92,10 @@ repository with support for the most common object storage implementations.
 It's developed by the Helm community and provides some very nice features such
 as basic auth, tls encryption and multi tenancy. 
 
-To install it we will use? Right, Helm! To keep it simple, we will use local
-storage for our dev environment. But feel free to try out every object storage
-implementation you like. The official Helm Chart say's that you will need to
-provide a `custom.yaml` values files to configure the persistence. 
+But what will we use to install it? Right, Helm! To keep it simple, we will use local
+storage for our dev environment. But feel free to try out any object storage
+implementation you like. The official Helm Chart says that you will need to
+provide a `custom.yaml` values file to configure the persistence. 
 
 ```yaml
 env:
@@ -382,7 +382,7 @@ blog  ClusterIP  10.103.227.99  <none>       2368/TCP  0s
 ```
 
 As you can see, we used our new remote repo instead of pointing to the local filesystem.
-You can now verify that the release is running. We will finish this part by
+You can now verify that the release is running. We will finish this part
 as usual by cleaning up our release.
 
 ```
