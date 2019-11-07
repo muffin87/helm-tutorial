@@ -73,7 +73,7 @@ information on how Helm manages the state of releases.
 
 ## What's under the hood?
 
-So what magic does Helm use to keep track of releases. We can once again list
+So what magic does Helm use to keep track of releases? We can once again list
 the Helm releases with:
 
 ```bash
@@ -100,8 +100,8 @@ blog.v2   1         18m
 ```
 
 As you see, we have two ConfigMaps for the blog release. `blog.v1` will have all
-information about the first revision and `blog.v2` for the second one. So what's
-inside these ConfigMaps:
+information about the first revision and `blog.v2` about the second one. So what's
+inside these ConfigMaps?
 
 ```bash
 kubectl -n tools get configmap blog.v1 -o yaml

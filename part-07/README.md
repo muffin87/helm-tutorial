@@ -2,7 +2,7 @@
 
 In this part we will take a look at dependency management. With Helm you can
 define dependencies which should be deployed together with your application. 
-This can be really helpful, when you have a bunch of applications which need to
+This can be really helpful when you have a bunch of applications which need to
 work together. Instead of creating a very big chart, which contains every 
 application, you can try to split them up and create multiple charts.
 
@@ -17,8 +17,8 @@ example: Let's take a look back at our Ghost application. In the first part we
 ran our blog software with a SQLite database. Imagine you are now facing the
 problem that the traffic on your running blog instance is very high and the
 latency increases. After taking a look in your monitoring system, you notice
-that the database is the bottleneck (high IO on the SQLite partition).
-You now have a few options like using faster storage or try to add a cache.
+that the database is the bottleneck (high I/O on the SQLite partition).
+You now have a few options like using faster storage or trying to add a cache.
 For our example we will try to switch the database from SQLite to MySQL. With
 MySQL you can use Master Slave replications which scale much better.
 So we need to modify our Ghost Chart. First we will create a
@@ -33,7 +33,7 @@ And add the following lines to that file:
 ```yaml
 dependencies:
 - name: mysql
-  version: "0.8.2"
+  version: "1.4.0"
   repository: "https://kubernetes-charts.storage.googleapis.com/"
 ```
 
@@ -43,11 +43,6 @@ version and the repository where to find it. For MySQL you can look up this info
 
 To match the new requirements we will need to change some things. Mainly we need
 to tell Ghost to connect to our MySQL Database:
-
-_Note: You may wonder why we don't convert the Statefulset to a Deployment since
-we have a external database to persist our data. Ghost stores not all
-information into the database. Images and other uploads will remain on disk. In
-our case in the PersistentVolume of the Statefulset._
 
 ```yaml
 apiVersion: apps/v1
@@ -144,6 +139,11 @@ spec:
           storage: 500Mi
 
 ```
+
+_Note: You may wonder why we don't convert the Statefulset to a Deployment since
+we have a external database to persist our data. Ghost stores not all
+information into the database. Images and other uploads will remain on disk. In
+our case in the PersistentVolume of the Statefulset._
 
 We added a bunch of environment variables to configure
 the database connection for Ghost (see `env` section). All available env vars 

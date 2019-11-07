@@ -6,7 +6,7 @@ these `Charts` we will need to introduce the Helm repo management.
 
 ## Helm Repos
 
-To easily ,manage share and reuse already packaged `Charts` the Helm Devs
+To easily manage, share and reuse already packaged `Charts` the Helm Devs
 developed repositories. For now we can define a `Chart` as a bundle of
 information necessary to create an instance of a Kubernetes application. A `Chart`
 normally contains a lot of YAML based files. To better handle them as a unit,
@@ -16,7 +16,7 @@ packaged `Charts`, a simple web server with an special index file is used (In
 [Part VI](../part-06/README.md) we will go into detail about that).
 
 With the `helm repo` command, you can easily manage repositories. You can list,
-add, update and remove them. Helm also setups some default repositories:
+add, update and remove them. Helm also setup some default repositories:
 
 ```
 helm repo list
@@ -30,7 +30,7 @@ local   http://127.0.0.1:8879/charts
 
 There are two repositories by default:
  * `stable` is the alias for the official Helm repo
- * `local` as an a lias when you want to host your own little repo (this
+ * `local` as an alias when you want to host your own little repo (this
 is mainly for development only use cases).
 
 Let's take a look at the `stable` repo. Currently you can't browse or explore
@@ -112,7 +112,7 @@ NOTES:
 So, what happened? We told `helm` that we want to install something.
 When we deploy with Helm, we create a so called `Release`. We gave our release a
 name with `--name wiki` (if you don't supply a release name, Helm will generate
-one for you. The last part of the command specifies the path and the name
+one for you). The last part of the command specifies the path and the name
 of the `Chart` we want to use. In this case `stable/dokuwiki`.
 
 The output will always contain some basic status information, like the name of
